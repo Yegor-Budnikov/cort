@@ -35,6 +35,7 @@ def extract_system_mentions(document, filter_mentions=True):
     system_mentions = [mentions.Mention.from_document(span, document)
                        for span in __extract_system_mention_spans(document)]
 
+    # print("DEBUG pre_filter")
     if filter_mentions:
         for post_processor in [
             post_process_same_head_largest_span,
@@ -46,6 +47,7 @@ def extract_system_mentions(document, filter_mentions=True):
             post_process_pleonastic_pronoun
         ]:
             system_mentions = post_processor(system_mentions)
+    # print("DEBUG post_filter")
 
     seen = set()
 
