@@ -73,13 +73,19 @@ def extract_substructures(doc):
     """
     substructures = []
 
+    MAGIC_NUMBER = 10 #to rewrite!! Number of mentions that we are looking back
+
     # iterate over mentions
     for i, ana in enumerate(doc.system_mentions):
         for_anaphor_arcs = []
 
         # iterate in reversed order over candidate antecedents
-        for ante in sorted(doc.system_mentions[:i], reverse=True):
+        for j, ante in enumerate(sorted(doc.system_mentions[:i], reverse=True)):
+            # if j < i - 1 and j > MAGIC_NUMBER: continue #i - MAGIC_NUMBER):i
             for_anaphor_arcs.append((ana, ante))
+
+            if ana.is_coreferent_with(ante):
+                break
 
         substructures.append(for_anaphor_arcs)
 
