@@ -35,8 +35,20 @@ def learn(training_corpus, instance_extractor, perceptron):
     logging.info("Learning.")
 
     logging.info("\tExtracting instances and features.")
-    substructures, arc_information = instance_extractor.extract(
-        training_corpus)
+    substructures, arc_information = instance_extractor.extract(training_corpus)
+    instance_extractor.extract(training_corpus)
+    # arc_information = {}
+    # substructures = []
+
+    # import pickle
+    # filename = '/home/redll/cort/my_test/pickle_files/' + 'substructures' + '.pickle'
+    # with open(filename, "rb") as f:
+    #     substructures.append(pickle.load(f))
+    #
+    # filename = '/home/redll/cort/my_test/pickle_files/' + 'arc_information' + '.pickle'
+    # with open(filename, "rb") as f:
+    #     curr_arc_info = pickle.load(f)
+    #     arc_information[curr_arc_info[0]] = curr_arc_info[1]
 
     logging.info("\tFitting model parameters.")
 

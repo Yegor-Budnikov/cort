@@ -3,13 +3,35 @@
 import array
 import multiprocessing
 import sys
+import logging
 
 import mmh3
 import numpy
 
+import pickle
+from os import path
+import os
 
-__author__ = 'martscsn'
+__author__ = 'smartschat'
 
+
+def pDump(data, dataname, mode):
+    filename = '/home/redll/cort/my_test/pickle_files/' + dataname + '.pickle'
+    os.makedirs(path.dirname(filename), exist_ok=True)
+
+    f = open(filename, mode)
+    pickle.dump(data, f)
+    f.close()
+
+def pLoad(dataname, mode):
+    filename = '/home/redll/cort/my_test/pickle_files/' + dataname + '.pickle'
+    with open(filename, mode) as f:
+        data_new = pickle.load(f)
+    return data_new
+
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(''message)s')
 
 # for python 2 multiprocessing
 def unwrap_extract_doc(arg, **kwarg):
@@ -75,6 +97,7 @@ class InstanceExtractor:
             self.convert_to_string_function = str
 
     def extract(self, corpus):
+        logging.info("We are in\n")
         """ Extract instances and features from a corpus.
 
         Args:
@@ -103,20 +126,31 @@ class InstanceExtractor:
         arc_information = {}
 
         id_to_doc_mapping = {}
+
+        debug_number_iterator = 0
+        logging.info("We are starting\n")
         for doc in corpus:
+            if debug_number_iterator % 100 == 0: logging.info(debug_number_iterator)
             id_to_doc_mapping[doc.identifier] = doc
+            debug_number_iterator += 1
+        logging.info("We have finished\n")
 
-        pool = multiprocessing.Pool(maxtasksperchild=1)
+        # pool = multiprocessing.Pool(maxtasksperchild=1)
+        #
+        # if sys.version_info[0] == 2:
+        #     results = pool.map(unwrap_extract_doc,
+        #                        zip([self] * len(corpus.documents),
+        #                            corpus.documents))
+        # else:
+        #     results = pool.map(self._extract_doc, corpus.documents)
+        #
+        # pool.close()
+        # pool.join()
 
-        if sys.version_info[0] == 2:
-            results = pool.map(unwrap_extract_doc,
-                               zip([self] * len(corpus.documents),
-                                   corpus.documents))
-        else:
-            results = pool.map(self._extract_doc, corpus.documents)
+        results = [self._extract_doc(doc) for doc in corpus.documents]
+        # results = [doc.identifier for doc in corpus.documents]
 
-        pool.close()
-        pool.join()
+        logging.info("We have finished biiig cycle\n")
 
         num_labels = len(self.labels)
 
@@ -132,7 +166,11 @@ class InstanceExtractor:
              nonnumeric_feature_mapping,
              numeric_feature_mapping,
              substructures_mapping) = result
+            # substructures_mapping) = pLoad(result, "rb")
 
+            #print(result[0] + ": " + str(sys.getsizeof(result)))
+            # print(sys.getsizeof(all_substructures)/1000000)
+            # print(sys.getsizeof(arc_information)/1000000)
             doc = id_to_doc_mapping[doc_identifier]
 
             for i in range(0, len(substructures_mapping) - 1):
@@ -170,9 +208,35 @@ class InstanceExtractor:
                          num_labels * pair_index:num_labels * pair_index
                          + num_labels],
                          consistency[pair_index])
+                    # curr_arc_information = (arc,
+                    #     ((nonnumeric_features[
+                    #       nonnumeric_features_start:nonnumeric_features_end
+                    #       ],
+                    #       numeric_features[
+                    #       numeric_features_start:numeric_features_end
+                    #       ],
+                    #       numeric_vals[
+                    #       numeric_features_start:numeric_features_end
+                    #       ]),
+                    #      costs[
+                    #      num_labels * pair_index:num_labels * pair_index
+                    #                              + num_labels],
+                    #      consistency[pair_index]))
 
+                # pDump(struct, "all_substructures", "ab")
+                # pDump(curr_arc_information, "arc_information", "ab")
                 all_substructures.append(struct)
-
+        #     (doc_identifier,
+        #      anaphors,
+        #      antecedents,
+        #      nonnumeric_features,
+        #      numeric_features,
+        #      numeric_vals,
+        #      costs,
+        #      consistency,
+        #      nonnumeric_feature_mapping,
+        #      numeric_feature_mapping,
+        #      substructures_mapping) = ([],[],[],[],[],[],[],[],[],[],[])
         # in python 2, array.array does not support the buffer interface
         if sys.version_info[0] == 2:
             for arc in arc_information:
@@ -187,6 +251,7 @@ class InstanceExtractor:
         return all_substructures, arc_information
 
     def _extract_doc(self, doc):
+        logging.info("We are extracting doc" + doc.identifier + "\n")
         cache = {}
         substructures = self.extract_substructures(doc)
 
@@ -247,6 +312,22 @@ class InstanceExtractor:
             # store position of substructures in document array
             substructures_mapping.append(substructures_mapping[-1] +
                                          len(struct))
+        logging.info("We have extracted doc\n")
+
+        # cResult = (doc.identifier,
+        #         anaphors,
+        #         antecedents,
+        #         nonnumeric_features,
+        #         numeric_features,
+        #         numeric_vals,
+        #         costs,
+        #         consistency,
+        #         nonnumeric_feature_mapping,
+        #         numeric_feature_mapping,
+        #         substructures_mapping)
+        # pDump(cResult, doc.identifier, "wb")
+
+        # return doc.identifier
 
         return (doc.identifier,
                 anaphors,
