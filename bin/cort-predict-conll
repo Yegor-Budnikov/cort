@@ -74,12 +74,14 @@ def parse_args():
 
 
 def get_scores(output_data, gold_data):
+    print(cort.__path__[0] + "\\reference-coreference-scorers\\v8.01\\scorer.pl")
+    print(os.getcwd() + "\\" + output_data)
     scorer_output = subprocess.check_output([
-        "perl",
-        cort.__path__[0] + "/reference-coreference-scorers/v8.01/scorer.pl",
+        "E:\\buML\\Strawberry\\perl\\bin\\perl.exe",
+        cort.__path__[0] + "\\reference-coreference-scorers\\v8.01\\scorer.pl",
         "all",
         gold_data,
-        os.getcwd() + "/" + output_data,
+        os.getcwd() + "\\" + output_data,
         "none"]).decode()
 
     metrics = ['muc', 'bcub', 'ceafm', 'ceafe', 'blanc']
@@ -95,6 +97,9 @@ def get_scores(output_data, gold_data):
             continue
 
         splitted = line.split()
+
+        if splitted == []:
+            continue
 
         if splitted[0] == "METRIC":
             metric = line.split()[1][:-1]

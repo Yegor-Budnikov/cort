@@ -16,6 +16,12 @@ from cort.util import import_helper
 
 
 __author__ = 'smartschat'
+"""
+Dummy counter
+Writes a line every 100 documents
+"""
+
+dummy_counter = 0
 
 
 logging.basicConfig(level=logging.INFO,
@@ -85,29 +91,29 @@ else:
         features.fine_type,
         features.gender,
         features.number,
-        # features.sem_class,
-        # features.deprel,
-        # features.head_ner,
-        # features.length,
-        # features.head,
-        # features.first,
-        # features.last,
-        # features.preceding_token,
-        # features.next_token,
-        # features.governor,
+        features.sem_class,
+        features.deprel,
+        features.head_ner,
+        features.length,
+        features.head,
+        features.first,
+        features.last,
+        features.preceding_token,
+        features.next_token,
+        features.governor,
         features.ancestry
     ]
 
     pairwise_features = [
         features.exact_match,
         features.head_match,
-        # features.same_speaker,
-        # features.alias,
-        # features.sentence_distance,
-        # features.embedding,
-        # features.modifier,
-        # features.tokens_contained,
-        # features.head_contained,
+        features.same_speaker,
+        features.alias,
+        features.sentence_distance,
+        features.embedding,
+        features.modifier,
+        features.tokens_contained,
+        features.head_contained,
         features.token_distance
     ]
 
@@ -127,12 +133,14 @@ extractor = instance_extractors.InstanceExtractor(
 )
 
 logging.info("Reading in data.")
-training_corpus = corpora.Corpus.from_file("training",
-                                           codecs.open(args.input_filename,
-                                                       "r", "utf-8"))
+training_corpus = corpora.Corpus.from_file("training", codecs.open(args.input_filename, "r", "utf-8"))
 
 logging.info("Extracting system mentions.")
+dummy_counter = 0
 for doc in training_corpus:
+    if dummy_counter % 100 == 99:
+        logging.info("We are extracting doc " + str(dummy_counter) + ": " + doc.identifier + "\n")
+        dummy_counter += 1
     doc.system_mentions = mention_extractor.extract_system_mentions(doc)
 
 model = experiments.learn(

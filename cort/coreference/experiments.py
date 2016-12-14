@@ -36,7 +36,7 @@ def learn(training_corpus, instance_extractor, perceptron):
 
     logging.info("\tExtracting instances and features.")
     substructures, arc_information = instance_extractor.extract(training_corpus)
-    instance_extractor.extract(training_corpus)
+
     # arc_information = {}
     # substructures = []
 

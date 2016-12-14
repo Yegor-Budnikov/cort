@@ -2,12 +2,13 @@
 
 import re
 
+import itertools
+from nltk import ParentedTree
 from nltk.corpus import wordnet as wn
 
 from cort.core import external_data
 from cort.core import head_finders
 from cort.core import spans
-
 
 __author__ = 'smartschat'
 
@@ -64,6 +65,10 @@ def compute_gender(attributes):
     head_index = attributes["head_index"]
     gender_data = external_data.GenderData.get_instance()
 
+    if attributes["head"] != [] and type(attributes["head"][0]) == type(ParentedTree('DT', ['a'])):
+        attributes["head"] = []
+        for i in itertools.chain.from_iterable(attributes["head"]):
+            attributes["head"].append(i.leaves())
     if compute_number(attributes) == "PLURAL":
         gender = "PLURAL"
     elif attributes["type"] == "PRO":
@@ -86,7 +91,12 @@ def compute_gender(attributes):
         elif gender_data.look_up(attributes):
             gender = gender_data.look_up(attributes)
     elif attributes["type"] == "NOM":
-        if __wordnet_lookup_gender(" ".join(attributes["head"])):
+        # print(attributes["head"][0])
+        # print(type(attributes["head"][0]))
+        # print(attributes["head"] == [] or type(attributes["head"][0]) != type(u'qwe'))
+        if attributes["head"] == [] or type(attributes["head"][0]) != type(u'qwe'):
+            pass
+        elif __wordnet_lookup_gender(" ".join(attributes["head"])):
             gender = __wordnet_lookup_gender(" ".join(attributes["head"]))
         elif gender_data.look_up(attributes):
             gender = gender_data.look_up(attributes)
@@ -131,7 +141,7 @@ def compute_semantic_class(attributes):
             semantic_class = "OBJECT"
     # wordnet lookup
     elif (attributes["type"] == "NOM" and
-            __wordnet_lookup_semantic_class(" ".join(attributes["head"]))):
+              __wordnet_lookup_semantic_class(" ".join(attributes["head"]))):
         semantic_class = __wordnet_lookup_semantic_class(
             " ".join(attributes["head"]))
 
@@ -296,7 +306,7 @@ def get_relevant_subtree(span, document):
         nltk.ParentedTree: The fragment of the parse tree at the span in the
         document.
     """
-    in_sentence_ids = document.in_sentence_ids[span.begin:span.end+1]
+    in_sentence_ids = document.in_sentence_ids[span.begin:span.end + 1]
     in_sentence_span = spans.Span(in_sentence_ids[0], in_sentence_ids[-1])
 
     sentence_id, sentence_span = document.get_sentence_id_and_span(span)
@@ -304,7 +314,7 @@ def get_relevant_subtree(span, document):
     sentence_tree = document.parse[sentence_id]
 
     spanning_leaves = sentence_tree.treeposition_spanning_leaves(
-        in_sentence_span.begin, in_sentence_span.end+1)
+        in_sentence_span.begin, in_sentence_span.end + 1)
     mention_subtree = sentence_tree[spanning_leaves]
 
     if mention_subtree in sentence_tree.leaves():
@@ -405,7 +415,7 @@ def get_fine_type(attributes):
 
     if coarse_type == "NOM":
         if re.match("^(the|this|that|these|those|my|your|his|her|its|our|" +
-                    "their)$", start_token.lower()):
+                            "their)$", start_token.lower()):
             return "DEF"
         elif re.match("^NNP$", start_pos):  # also matches NNPS!
             return "DEF"
@@ -418,14 +428,14 @@ def get_fine_type(attributes):
                       start_token.lower()):
             return "PERS_ACC"
         elif re.match("^(myself|yourself|yourselves|himself|herself|itself|" +
-                      "ourselves|themselves)$", start_token.lower()):
+                              "ourselves|themselves)$", start_token.lower()):
             return "REFL"
         elif start_pos == "PRP" and re.match("^(mine|yours|his|hers|its|" +
-                                             "ours|theirs|)$",
+                                                     "ours|theirs|)$",
                                              start_token.lower()):
             return "POSS"
         elif start_pos == "PRP$" and re.match("^(my|your|his|her|its|our|" +
-                                              "their)$", start_token.lower()):
+                                                      "their)$", start_token.lower()):
             return "POSS_ADJ"
 
 
@@ -443,17 +453,17 @@ def get_citation_form(attributes):
     pronoun = attributes["tokens"][0]
 
     pronoun = pronoun.lower()
-    if re.match("^(he|him|himself|his)$",  pronoun):
+    if re.match("^(he|him|himself|his)$", pronoun):
         return "he"
-    elif re.match("^(she|her|herself|hers|her)$",  pronoun):
+    elif re.match("^(she|her|herself|hers|her)$", pronoun):
         return "she"
-    elif re.match("^(it|itself|its)$",  pronoun):
+    elif re.match("^(it|itself|its)$", pronoun):
         return "it"
-    elif re.match("^(they|them|themselves|theirs|their)$",  pronoun):
+    elif re.match("^(they|them|themselves|theirs|their)$", pronoun):
         return "they"
-    elif re.match("^(i|me|myself|mine|my)$",  pronoun):
+    elif re.match("^(i|me|myself|mine|my)$", pronoun):
         return "i"
-    elif re.match("^(you|yourself|yourselves|yours|your)$",  pronoun):
+    elif re.match("^(you|yourself|yourselves|yours|your)$", pronoun):
         return "you"
-    elif re.match("^(we|us|ourselves|ours|our)$",  pronoun):
+    elif re.match("^(we|us|ourselves|ours|our)$", pronoun):
         return "we"

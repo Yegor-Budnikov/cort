@@ -53,6 +53,9 @@ class Visualizer:
         system_corpus = self.structured_coreference_analysis.corpora[
             self.corpus_name]
 
+
+        good_stat = 0
+        bad_stat = 0
         for document in sorted(self.structured_coreference_analysis.reference.documents,
                                key=lambda doc:
                                doc.get_html_friendly_identifier()):
@@ -62,10 +65,15 @@ class Visualizer:
             document_mentions = document.annotated_mentions
 
             if not self.for_raw_input:
-                system_mentions = system_corpus.documents[
+                try:
+                    system_mentions = system_corpus.documents[
                                         system_corpus.documents.index(document)
                                     ].annotated_mentions
-                document_mentions = sorted(document_mentions + system_mentions)
+                    document_mentions = sorted(document_mentions + system_mentions)
+                    good_stat += 1
+                except ValueError:
+                    bad_stat += 1
+                    continue
 
             if self.for_raw_input:
                 text_source = self.__generate_html_for_raw(document,
@@ -147,6 +155,9 @@ class Visualizer:
                     "",
                     document_mentions,
                     "Decision")
+
+        print("Good documents: " + str(good_stat))
+        print("Bad documents: " + str(bad_stat))
 
         errors_source = errors_source[:-2] + " ];\n\t\t\tchain_to_colour = {"
 

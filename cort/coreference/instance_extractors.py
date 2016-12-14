@@ -14,6 +14,12 @@ import os
 
 __author__ = 'smartschat'
 
+"""
+Dummy counter
+Writes a line every 100 documents
+"""
+
+dummy_counter = 0
 
 def pDump(data, dataname, mode):
     filename = '/home/redll/cort/my_test/pickle_files/' + dataname + '.pickle'
@@ -97,7 +103,7 @@ class InstanceExtractor:
             self.convert_to_string_function = str
 
     def extract(self, corpus):
-        logging.info("We are in\n")
+        # logging.info("\tWe are in\n")
         """ Extract instances and features from a corpus.
 
         Args:
@@ -128,12 +134,12 @@ class InstanceExtractor:
         id_to_doc_mapping = {}
 
         debug_number_iterator = 0
-        logging.info("We are starting\n")
+        # logging.info("\tWe are starting\n")
         for doc in corpus:
-            if debug_number_iterator % 100 == 0: logging.info(debug_number_iterator)
+            # if debug_number_iterator % 100 == 0: logging.info(debug_number_iterator)
             id_to_doc_mapping[doc.identifier] = doc
             debug_number_iterator += 1
-        logging.info("We have finished\n")
+        # logging.info("\tWe have finished\n")
 
         # pool = multiprocessing.Pool(maxtasksperchild=1)
         #
@@ -147,13 +153,16 @@ class InstanceExtractor:
         # pool.close()
         # pool.join()
 
+        global dummy_counter
+        dummy_counter = 0
         results = [self._extract_doc(doc) for doc in corpus.documents]
         # results = [doc.identifier for doc in corpus.documents]
 
-        logging.info("We have finished biiig cycle\n")
+        logging.info("\tWe have finished biiig cycle\n")
 
         num_labels = len(self.labels)
 
+        dummy_counter = 0
         for result in results:
             (doc_identifier,
              anaphors,
@@ -172,6 +181,10 @@ class InstanceExtractor:
             # print(sys.getsizeof(all_substructures)/1000000)
             # print(sys.getsizeof(arc_information)/1000000)
             doc = id_to_doc_mapping[doc_identifier]
+
+            if dummy_counter % 100 == 99:
+                logging.info("\tFor some reason we are mapping something: " + str(dummy_counter) + "\n")
+            dummy_counter += 1
 
             for i in range(0, len(substructures_mapping) - 1):
                 struct = []
@@ -251,7 +264,10 @@ class InstanceExtractor:
         return all_substructures, arc_information
 
     def _extract_doc(self, doc):
-        logging.info("We are extracting doc" + doc.identifier + "\n")
+        global dummy_counter
+        if dummy_counter % 100 == 99:
+            logging.info("We are extracting doc " + str(dummy_counter) + ": " + doc.identifier + "\n")
+        dummy_counter += 1
         cache = {}
         substructures = self.extract_substructures(doc)
 
@@ -312,7 +328,7 @@ class InstanceExtractor:
             # store position of substructures in document array
             substructures_mapping.append(substructures_mapping[-1] +
                                          len(struct))
-        logging.info("We have extracted doc\n")
+        # logging.info("We have extracted doc\n")
 
         # cResult = (doc.identifier,
         #         anaphors,

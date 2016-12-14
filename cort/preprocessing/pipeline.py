@@ -1,16 +1,13 @@
 __author__ = 'martscsn'
 
-import cort
-
 import codecs
 
-import stanford_corenlp_pywrapper
-
-from StanfordDependencies import CoNLL
-
-from cort.core import corpora, documents, spans
-
 import bs4
+
+import cort
+import stanford_corenlp_pywrapper
+from cort.StanfordDependencies import CoNLL
+from cort.core import corpora, documents, spans
 
 
 class Pipeline():

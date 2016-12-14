@@ -27,7 +27,6 @@ Reference:
       http://www.aclweb.org/anthology/J01-4004
 """
 
-
 from cort.coreference import perceptrons
 
 
@@ -70,8 +69,8 @@ def extract_training_substructures(doc):
         for ante in sorted(doc.system_mentions[1:i], reverse=True):
             substructures.append([(ana, ante)])
 
-            if ana.is_coreferent_with(ante):
-                break
+            # if ana.is_coreferent_with(ante):
+            #     break
 
     return substructures
 

@@ -84,8 +84,8 @@ def extract_substructures(doc):
             # if j < i - 1 and j > MAGIC_NUMBER: continue #i - MAGIC_NUMBER):i
             for_anaphor_arcs.append((ana, ante))
 
-            if ana.is_coreferent_with(ante):
-                break
+            # if ana.is_coreferent_with(ante):
+            #     break
 
         substructures.append(for_anaphor_arcs)
 

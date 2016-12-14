@@ -6,6 +6,7 @@ import multiprocessing
 from cort.analysis import data_structures
 from cort.core import documents
 from cort.core import spans
+import logging
 
 __author__ = 'smartschat'
 
@@ -67,16 +68,25 @@ class Corpus:
 
         current_document = ""
 
+        """
+        Dummy counter
+        Writes a line every 100 documents
+        """
+
+        dummy_counter = 0
+
         for line in coref_file.readlines():
             if line.startswith("#begin") and current_document != "":
                 document_as_strings.append(current_document)
                 current_document = ""
+                dummy_counter += 1
+                if dummy_counter % 100 == 99:
+                    logging.info("\tReading: " + str(dummy_counter))
             current_document += line
 
         document_as_strings.append(current_document)
-
-        return Corpus(description, sorted([from_string(doc) for doc in
-                                           document_as_strings]))
+        logging.info("\tWe are done reading\n")
+        return Corpus(description, sorted([from_string(doc) for doc in document_as_strings]))
 
 
 

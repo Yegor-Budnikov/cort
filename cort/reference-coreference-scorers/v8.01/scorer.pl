@@ -11,7 +11,7 @@ BEGIN {
     unshift(@INC, $d . "/lib");
   }
 }
-
+use lib 'E:\\buML\\cort\\src\\cort\\reference-coreference-scorers\\v8.01\\lib';
 use strict;
 use CorScorer;
 
