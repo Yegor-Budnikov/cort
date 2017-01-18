@@ -49,10 +49,11 @@ def get_clusterer(system):
 # data_sets = ["dev", "test"]
 
 systems = ["latent"]
+# systems = ["pair", "closest", "tree"]
 # systems = ["pair", "closest", "latent", "tree"]
 # systems = ["tree"]
 # data_sets = ["dev-english", "test-english"]
-data_sets = ["dev-english"]
+data_sets = ["test-english"]
 # data_sets = ["train-english", "dev-english", "test-english"]
 
 # "C:\\Users\\ebudnikov\\AppData\\Local\\Continuum\\Miniconda3_1\\python.exe",
@@ -75,42 +76,42 @@ for system in systems:
 
     for data_set in data_sets:
         print("Predicting", system, "on", data_set)
-        # if data_set == "dev-english":
-        #     model = "E:\\buML\\cort\\data\\models\\gold-english-train\\model-" + system + "-train.obj"
-        # else:
-        #     model = "E:\\buML\\cort\\data\\models\\gold-english-train+dev\\model-" + system + "-train+dev.obj"
+        if data_set == "dev-english":
+            model = "E:\\buML\\cort\\data\\models\\gold-english-train\\model-" + system + "-train.obj"
+        else:
+            model = "E:\\buML\\cort\\data\\models\\gold-english-train+dev\\model-" + system + "-train+dev.obj"
 
-        model = "E:\\buML\\cort\\data\\models\\gold-english-train\\model-" + system + "-train.obj"
+        # model = "E:\\buML\\cort\\data\\models\\gold-english-train\\model-" + system + "-train.obj"
         print("model = ", model)
         subprocess.call([
             "C:\\Anaconda\\python.exe",
             "E:\\buML\\cort\\src\\bin\\cort-predict-conll",
             # "-in", "/home/redll/cort/my_test/" + data_set + ".auto",
             # "-gold", "/home/redll/cort/my_test/" + data_set + ".gold",
-            "-in", "E:\\buML\\cort\\data\\sets\\" + data_set + ".auto",
+            "-in", "E:\\buML\\cort\\data\\sets\\" + data_set + ".gold",
             "-gold", "E:\\buML\\cort\\data\\sets\\" + data_set + ".gold",
             "-model", model,
-            "-out", "model-" + system + "-train-output",
-            "-ante", "output.antecedents",
+            "-out", "model-" + system + "-output",
+            "-ante", "model-" + system + "-output.antecedents",
             "-extractor", get_extractor(data_set, system),
             "-perceptron", get_perceptron(system),
             "-clusterer", get_clusterer(system)])
 
-        model = "E:\\buML\\cort\\data\\models\\gold-english-train+dev\\model-" + system + "-train+dev.obj"
-        print("model = ", model)
-        subprocess.call([
-            "C:\\Anaconda\\python.exe",
-            "E:\\buML\\cort\\src\\bin\\cort-predict-conll",
-            # "-in", "/home/redll/cort/my_test/" + data_set + ".auto",
-            # "-gold", "/home/redll/cort/my_test/" + data_set + ".gold",
-            "-in", "E:\\buML\\cort\\data\\sets\\" + data_set + ".auto",
-            "-gold", "E:\\buML\\cort\\data\\sets\\" + data_set + ".gold",
-            "-model", model,
-            "-out", "model-" + system + "-train+dev-output",
-            "-ante", "output.antecedents",
-            "-extractor", get_extractor(data_set, system),
-            "-perceptron", get_perceptron(system),
-            "-clusterer", get_clusterer(system)])
+        # model = "E:\\buML\\cort\\data\\models\\gold-english-train+dev\\model-" + system + "-train+dev.obj"
+        # print("model = ", model)
+        # subprocess.call([
+        #     "C:\\Anaconda\\python.exe",
+        #     "E:\\buML\\cort\\src\\bin\\cort-predict-conll",
+        #     # "-in", "/home/redll/cort/my_test/" + data_set + ".auto",
+        #     # "-gold", "/home/redll/cort/my_test/" + data_set + ".gold",
+        #     "-in", "E:\\buML\\cort\\data\\sets\\" + data_set + ".auto",
+        #     "-gold", "E:\\buML\\cort\\data\\sets\\" + data_set + ".gold",
+        #     "-model", model,
+        #     "-out", "model-" + system + "-train+dev-output",
+        #     "-ante", "output.antecedents",
+        #     "-extractor", get_extractor(data_set, system),
+        #     "-perceptron", get_perceptron(system),
+        #     "-clusterer", get_clusterer(system)])
 
 # subprocess.run([
 #     "/home/redll/cort/bin/cort-predict-conll",

@@ -62,6 +62,8 @@ class Visualizer:
             doc_id = document.get_html_friendly_identifier()
             documents_navi += "\n\t\t\t\t<li>" + doc_id + "</li>"
 
+            if good_stat % 100 == 99: print(doc_id)
+
             document_mentions = document.annotated_mentions
 
             if not self.for_raw_input:
