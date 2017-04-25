@@ -138,6 +138,14 @@ class Mention:
             "first_in_gold_entity": first_in_gold_entity
         }
 
+        #if Document is SemanticCoNLLDocument then:
+        if hasattr(document, 'compreno_sem_class'):
+            attributes["compreno_sem_class"] = document.compreno_sem_class[span.begin:span.end + 1]
+        if hasattr(document, 'compreno_surf_slot'):
+            attributes["compreno_surf_slot"] = document.compreno_surf_slot[span.begin:span.end + 1]
+        if hasattr(document, 'compreno_sem_path'):
+            attributes["compreno_sem_path"] = document.compreno_sem_path[span.begin:span.end + 1]
+
         if span in document.coref:
             attributes["annotated_set_id"] = document.coref[span]
         else:

@@ -12,7 +12,8 @@ __author__ = 'smartschat'
 
 
 def from_string(string):
-    return documents.CoNLLDocument(string)
+    # return documents.CoNLLDocument(string)
+    return documents.SemanticCoNLLDocument(string)
 
 
 class Corpus:

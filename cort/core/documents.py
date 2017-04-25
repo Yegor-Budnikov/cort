@@ -591,3 +591,35 @@ class CoNLLDocument(Document):
         splitted_by_whitespace = self.identifier.split()
         return splitted_by_whitespace[0].split("/")[-1][:-2] + \
                "_part_" + splitted_by_whitespace[-1]
+
+
+class SemanticCoNLLDocument(CoNLLDocument):
+    """Inherits CoNLLDocument, a document in CoNLL format.
+
+    For a specification of the format, see class CoNLLDocument
+
+
+    Additional attributes:
+        sem_classes(str): Semantic class and all its anscestors got from Compreno
+
+    """
+
+
+    def __init__(self, document_as_string):
+        """ Construct a document from a string representation.
+
+            The Format must follow the CoNLL format, see
+                http://conll.cemantix.org/2012/data.html.
+
+            Args:
+                document_as_string (str): A representation of a document in
+                    the CoNLL format.
+            """
+
+        self.document_table = CoNLLDocument._CoNLLDocument__string_to_table(document_as_string)
+        self.compreno_sem_class = self._CoNLLDocument__extract_from_column(-3)
+        self.compreno_sem_path = self._CoNLLDocument__extract_from_column(-2)
+        self.compreno_surf_slot = self._CoNLLDocument__extract_from_column(-4)
+        CoNLLDocument.__init__(self, document_as_string)
+        # print("!!!")
+
