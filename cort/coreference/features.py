@@ -80,6 +80,97 @@ def sem_class(mention):
     """
     return "sem_class", mention.attributes["semantic_class"]
 
+def compreno_sem_class(mention):
+    """ Compute semantic class of a mention provided with Compreno.
+
+    Args:
+        mention (Mention): A mention.
+
+    Returns:
+        The tuple ('compreno_sem_class', SEM_CLASS), where SEM_CLASS is one of
+        semantic classes.
+    """
+
+    res = []
+    for sc in mention.attributes["compreno_sem_path"][0].split(':'):
+        res.append(("compreno_sem_class", sc))
+    return res
+    # return "compreno_sem_class", mention.attributes["compreno_sem_class"]
+
+def compreno_surf_slot(mention):
+    """ Compute surface slot of a mention provided with Compreno.
+
+    Args:
+        mention (Mention): A mention.
+
+    Returns:
+        The tuple ('compreno_surf_slot', SURF_SLOT), where SURF_SLOT is one of
+        surface slots.
+    """
+    return "compreno_surf_slot", mention.attributes["compreno_surf_slot"]
+
+def compreno_sem_class_exact_match(anaphor, antecedent):
+    """ Compute whether the tokens of two mentions have exact semantic classes provided with Compreno.
+
+    Args:
+        anaphor (Mention): A mention.
+        antecedent (Mention): Another mention, preceding the anaphor.
+
+    Returns:
+        The tuple ('compreno_sem_class_exact_match', MATCH), where MATCH is True if the mentions
+        have exact semantic classes, and False otherwise.
+    """
+
+    match = anaphor.attributes["compreno_sem_path"] == \
+            antecedent.attributes["compreno_sem_path"]
+    if anaphor.attributes["compreno_sem_path"] == '*' or antecedent.attributes["compreno_sem_path"] == '*':
+        match = False
+
+    return "compreno_sem_class_exact_match", match
+
+def compreno_common_sem_anscestor(anaphor, antecedent):
+    """ Compute semantic class common for both mentions.
+
+    Args:
+        anaphor (Mention): A mention.
+        antecedent (Mention): Another mention, preceding the anaphor.
+
+    Returns:
+        The tuple ('compreno_common_sem_anscestor', SEMCLASS), where SEMCLASS is a common semantic class.
+    """
+    # print (anaphor.attributes["compreno_sem_path"][0])
+    ana_path = anaphor.attributes["compreno_sem_path"][0].split(':')
+    ante_path = antecedent.attributes["compreno_sem_path"][0].split(':')
+    res_idx = -1
+    for i in xrange(min(len(ana_path), len(ante_path))):
+        if ana_path[i] == ante_path[i]:
+            res_idx = i
+        else:
+            break
+    if res_idx == -1:
+        return "compreno_common_sem_anscestor", '*'
+    return "compreno_common_sem_anscestor", ante_path[res_idx]
+
+
+def compreno_surf_slot_exact_match(anaphor, antecedent):
+    """ Compute whether the tokens of two mentions have exact surface slots provided with Compreno.
+
+    Args:
+        anaphor (Mention): A mention.
+        antecedent (Mention): Another mention, preceding the anaphor.
+
+    Returns:
+        The tuple ('compreno_surf_slot_exact_match', MATCH), where MATCH is True if the mentions
+        have exact surface slots, and False otherwise.
+    """
+
+    match = anaphor.attributes["compreno_surf_slot"] == \
+            antecedent.attributes["compreno_surf_slot"]
+    if anaphor.attributes["compreno_surf_slot"] == '*' or antecedent.attributes["compreno_surf_slot"] == '*':
+        match = False
+
+    return "compreno_surf_slot", match
+
 
 def gr_func(mention):
     """ Compute grammatical function of a mention.

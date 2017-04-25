@@ -52,7 +52,7 @@ sys.setdefaultencoding('utf8')
 
 print(0)
 
-reference = corpora.Corpus.from_file("reference", open("E:\\buML\\cort\\data\\sets\\test-english.gold"))
+reference = corpora.Corpus.from_file("reference", open("E:\\buML\\cort\\data\\sets\\all that is not current\\test-english.gold"))
 
 print(1)
 
@@ -82,7 +82,7 @@ print(2)
 
 errors = extractor.get_errors()
 
-print(errors)
+# print(errors)
 print(3)
 
 # errors_by_type = errors.categorize(
@@ -127,8 +127,69 @@ def is_anaphor_extracted(mention1, mention2):
 errors_by_type = errors.categorize(lambda err: is_anaphor_extracted(err[0], err[1]))
 
 
-print(errors_by_type)
+# print(errors_by_type)
 
+precision_errs = errors_by_type["latent"]["precision_errors"]["all"]
+recall_errs = errors_by_type["latent"]["recall_errors"]["all"]
+
+dictt = dict()
+# print(precision_errs.keys())
+for key in precision_errs.keys():
+    dictt[key] = 0
+for key in recall_errs.keys():
+    dictt[key] = 0
+
+for key in precision_errs.keys():
+    dictt[key] += len(precision_errs[key])
+for key in recall_errs.keys():
+    dictt[key] += len(recall_errs[key])
+
+# ante_is_spurius_in_extracted = precision_errs['ante_is_spurius_in_extracted']
+# is_extracted_and_gold = precision_errs['is_extracted_and_gold']
+# mention_is_spurius_in_extracted = precision_errs['mention_is_spurius_in_extracted']
+# so_spurius = precision_errs['so_spurius']
+#
+#
+# ante_is_missing_in_extracted = recall_errs['ante_is_missing_in_extracted']
+# rec_is_extracted_and_gold = recall_errs['is_extracted_and_gold']
+# mention_is_missing_in_extracted = recall_errs['mention_is_missing_in_extracted']
+# so_missing = recall_errs['so_missing']
+
+for key in dictt.keys():
+    print(key)
+    print(dictt[key])
+
+print('precision_errs')
+print(len(precision_errs))
+
+print('recall_errs')
+print(len(recall_errs))
+
+# print('is_extracted_and_gold')
+# print(len(is_extracted_and_gold) + len(rec_is_extracted_and_gold))
+#
+# print('ante_is_spurius_in_extracted')
+# print(len(ante_is_spurius_in_extracted))
+#
+# print('ante_is_missing_in_extracted')
+# print(len(recall_errs))
+#
+# print('mention_is_spurius_in_extracted')
+# print(len(mention_is_spurius_in_extracted))
+#
+# print('mention_is_missing_in_extracted')
+# print(len(mention_is_missing_in_extracted))
+#
+# print('so_spurius')
+# print(len(so_spurius))
+#
+# print('so_missing')
+# print(len(so_missing))
+
+
+
+
+print('')
 print(4)
 
 errors_by_type.visualize("latent")

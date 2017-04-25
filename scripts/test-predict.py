@@ -53,7 +53,8 @@ systems = ["latent"]
 # systems = ["pair", "closest", "latent", "tree"]
 # systems = ["tree"]
 # data_sets = ["dev-english", "test-english"]
-data_sets = ["test-english"]
+data_sets = ["new_test_compreno"]
+# data_sets = ["test_compreno"]
 # data_sets = ["train-english", "dev-english", "test-english"]
 
 # "C:\\Users\\ebudnikov\\AppData\\Local\\Continuum\\Miniconda3_1\\python.exe",
@@ -76,23 +77,31 @@ for system in systems:
 
     for data_set in data_sets:
         print("Predicting", system, "on", data_set)
-        if data_set == "dev-english":
+        if data_set in ["dev-english"]:
             model = "E:\\buML\\cort\\data\\models\\gold-english-train\\model-" + system + "-train.obj"
-        else:
+        elif data_set in ["test-english"]:
             model = "E:\\buML\\cort\\data\\models\\gold-english-train+dev\\model-" + system + "-train+dev.obj"
+        elif data_set in ["dev_compreno"]:
+            model = "E:\\buML\\cort\\data\\models\\compreno-train\\model-" + system + "-train_compreno.obj"
+        elif data_set in ["test_compreno"]:
+            model = "E:\\buML\\cort\\data\\models\\compreno-train+dev\\model-" + system + "-train+dev_compreno.obj"
+        elif data_set in ["new_dev_compreno", "new_test_compreno"]:
+            model = "E:\\buML\\cort\\data\\models\\new_compreno-train\\new_model-" + system + "-train_compreno.obj"
+        elif data_set in ["new_test_compreno"]:
+            model = "E:\\buML\\cort\\data\\models\\new_compreno-train+dev\\new_model-" + system + "-train+dev_compreno.obj"
 
         # model = "E:\\buML\\cort\\data\\models\\gold-english-train\\model-" + system + "-train.obj"
         print("model = ", model)
         subprocess.call([
             "C:\\Anaconda\\python.exe",
             "E:\\buML\\cort\\src\\bin\\cort-predict-conll",
-            # "-in", "/home/redll/cort/my_test/" + data_set + ".auto",
-            # "-gold", "/home/redll/cort/my_test/" + data_set + ".gold",
+            # "-in", "E:\\buML\\cort\\data\\sets\\short_new_train_compreno.gold",
+            # "-gold", "E:\\buML\\cort\\data\\sets\\short_new_train_compreno.gold",
             "-in", "E:\\buML\\cort\\data\\sets\\" + data_set + ".gold",
             "-gold", "E:\\buML\\cort\\data\\sets\\" + data_set + ".gold",
             "-model", model,
-            "-out", "model-" + system + "-output",
-            "-ante", "model-" + system + "-output.antecedents",
+            "-out", "new_compreno_model-" + system + "-output",
+            "-ante", "new_compreno_model-" + system + "-output.antecedents",
             "-extractor", get_extractor(data_set, system),
             "-perceptron", get_perceptron(system),
             "-clusterer", get_clusterer(system)])

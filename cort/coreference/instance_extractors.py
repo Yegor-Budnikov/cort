@@ -19,6 +19,38 @@ Dummy counter
 Writes a line every 100 documents
 """
 
+percentage = {
+    99:"1%",
+    199:"2,5%",
+    299:"4,3%",
+    399: "4,5%",
+    499: "4,5% again :)",
+    599: "4,8%",
+    699: "5,5%",
+    799: "6,6%",
+    899: "7,5%",
+    999: "7,5% agian :)",
+    1099: "8%",
+    1199: "8,6%",
+    1299: "9%",
+    1399: "9,3% -- a big one -- next 18,6% in 4,5 hours",
+    1499: "18,6% -- a big one -- next 29,1% in 5 hours and a quater",
+    1599: "29,1%",
+    1699: "35,1%",
+    1799: "41%",
+    1899: "49% -- a big one - next 78,7% in 15 hours",
+    1999: "78,7%",
+    2099: "79%",
+    2199: "79,7%",
+    2299: "81,4%",
+    2399: "86,8%",
+    2499: "89%",
+    2599: "91%",
+    2699: "95,5%",
+    2799: "99,7%"
+}
+
+
 dummy_counter = 0
 
 def pDump(data, dataname, mode):
@@ -251,6 +283,9 @@ class InstanceExtractor:
         #      numeric_feature_mapping,
         #      substructures_mapping) = ([],[],[],[],[],[],[],[],[],[],[])
         # in python 2, array.array does not support the buffer interface
+
+        dummy_counter = 0
+
         if sys.version_info[0] == 2:
             for arc in arc_information:
                 feats, cost, cons = arc_information[arc]
@@ -265,8 +300,10 @@ class InstanceExtractor:
 
     def _extract_doc(self, doc):
         global dummy_counter
-        if dummy_counter % 100 == 99:
+        if dummy_counter % 50 == 49:
             logging.info("We are extracting doc " + str(dummy_counter) + ": " + doc.identifier + "\n")
+            if dummy_counter in percentage.keys():
+                logging.info("\tCurrent progress: " + str(percentage[dummy_counter]))
         dummy_counter += 1
         cache = {}
         substructures = self.extract_substructures(doc)
@@ -368,8 +405,14 @@ class InstanceExtractor:
             # mention features
             for mention in [anaphor, antecedent]:
                 if mention not in cache:
-                    cache[mention] = [feature(mention) for feature
-                                      in self.mention_features]
+                    # cache[mention] = [feature(mention) for feature
+                    #                   in self.mention_features]
+                    cache[mention] = []
+                    for feature in self.mention_features:
+                        if type(feature(mention)).__name__ == "tuple":
+                            cache[mention].append(feature(mention))
+                        if type(feature(mention)).__name__ == "list":
+                            cache[mention].extend(feature(mention))
 
             ana_features = cache[anaphor]
             ante_features = cache[antecedent]

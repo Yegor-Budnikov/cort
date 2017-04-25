@@ -7,7 +7,7 @@ import logging
 __author__ = 'smartschat'
 
 
-def learn(training_corpus, instance_extractor, perceptron):
+def learn(training_corpus, instance_extractor, perceptron, coref_extractor):
     """ Learn a model for coreference resolution from training data.
 
     In particular, apply an instance/feature extractor to a training corpus and
@@ -34,6 +34,15 @@ def learn(training_corpus, instance_extractor, perceptron):
     """
     logging.info("Learning.")
 
+    logging.info("\tVerifying attributes.")
+    for doc in training_corpus:
+        doc.antecedent_decisions = {}
+        for mention in doc.system_mentions:
+            if not "antecedent" in mention.attributes.keys():
+                mention.attributes["antecedent"] = None
+            if not "set_id" in mention.attributes.keys():
+                mention.attributes["set_id"] = None
+
     logging.info("\tExtracting instances and features.")
     substructures, arc_information = instance_extractor.extract(training_corpus)
 
@@ -54,7 +63,24 @@ def learn(training_corpus, instance_extractor, perceptron):
 
     perceptron.fit(substructures, arc_information)
 
-    return perceptron.get_model()
+
+    # logging.info("\tDoing predictions.")
+    # arcs, labels, scores = perceptron.predict(substructures, arc_information)
+    #
+    # logging.info("\tClustering results.")
+
+    logging.info("Verifying results on train set.")
+
+
+    logging.info("\tDoing predictions.")
+    arcs, labels, scores = perceptron.predict(substructures, arc_information)
+
+    logging.info("\tClustering results.")
+
+    mention_entity_mapping, antecedent_mapping = coref_extractor(arcs, labels, scores, perceptron.get_coref_labels())
+
+    return perceptron.get_model(), mention_entity_mapping, antecedent_mapping
+    # return perceptron.get_model(), coref_extractor(arcs, labels, scores, perceptron.get_coref_labels())
 
 
 def predict(testing_corpus,

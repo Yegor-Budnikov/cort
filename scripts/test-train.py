@@ -48,7 +48,7 @@ def get_clusterer(system):
 # systems = ["pair", "closest", "latent", "tree"]
 # data_sets = ["dev", "test"]
 
-systems = ["closest", "latent"]
+systems = ["latent"]
 # systems = ["pair", "closest", "latent", "tree"]
 # systems = ["tree"]
 # data_sets = ["dev-english", "test-english"]
@@ -64,25 +64,28 @@ for system in systems:
         "E:\\buML\\cort\\src\\bin\\cort-train",
         # "-in", "E:\\buML\\cort\\data\\sets\\train+dev-english.gold",
         # "-out", "E:\\buML\\cort\\data\\models\\model-" + system + "-train+dev.obj",
-        "-in", "E:\\buML\\cort\\data\\sets\\train-english.gold",
-        "-out", "E:\\buML\\cort\\data\\models\\model-" + system + "-train.obj",
+        "-in", "E:\\buML\\cort\\data\\sets\\short_new_train_compreno.gold",
+        "-out", "E:\\buML\\cort\\data\\models\\short_new_model-" + system + "-train_compreno.obj",
+        "-ante", "train.output.antecedents",
         "-extractor", get_extractor("train", system),
         "-perceptron", get_perceptron(system),
+        "-clusterer", get_clusterer(system),
+        "-n_iter", "20",
         "-cost_function", get_cost_function(system),
         "-cost_scaling", "100"])
 
-    print("Training", system, "on train+dev.")
-    subprocess.call([
-        "C:\\Anaconda\\python.exe",
-        "E:\\buML\\cort\\src\\bin\\cort-train",
-        # "-in", "E:\\buML\\cort\\data\\sets\\train+dev-english.gold",
-        # "-out", "E:\\buML\\cort\\data\\models\\model-" + system + "-train+dev.obj",
-        "-in", "E:\\buML\\cort\\data\\sets\\train+dev-english.gold",
-        "-out", "E:\\buML\\cort\\data\\models\\model-" + system + "-train+dev.obj",
-        "-extractor", get_extractor("train", system),
-        "-perceptron", get_perceptron(system),
-        "-cost_function", get_cost_function(system),
-        "-cost_scaling", "100"])
+    # print("Training", system, "on train+dev.")
+    # subprocess.call([
+    #     "C:\\Anaconda\\python.exe",
+    #     "E:\\buML\\cort\\src\\bin\\cort-train",
+    #     # "-in", "E:\\buML\\cort\\data\\sets\\train+dev-english.gold",
+    #     # "-out", "E:\\buML\\cort\\data\\models\\model-" + system + "-train+dev.obj",
+    #     "-in", "E:\\buML\\cort\\data\\sets\\pronoun_train+dev_compreno.gold",
+    #     "-out", "E:\\buML\\cort\\data\\models\\model-" + system + "-train+dev_compreno.obj",
+    #     "-extractor", get_extractor("train", system),
+    #     "-perceptron", get_perceptron(system),
+    #     "-cost_function", get_cost_function(system),
+    #     "-cost_scaling", "100"])
 
 
     # for data_set in data_sets:

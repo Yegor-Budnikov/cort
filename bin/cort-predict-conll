@@ -142,6 +142,10 @@ else:
         features.gender,
         features.number,
         features.sem_class,
+
+        features.compreno_sem_class,
+        features.compreno_surf_slot,
+
         features.deprel,
         features.head_ner,
         features.length,
@@ -157,6 +161,11 @@ else:
     pairwise_features = [
         features.exact_match,
         features.head_match,
+
+        features.compreno_sem_class_exact_match,
+        features.compreno_surf_slot_exact_match,
+        features.compreno_common_sem_anscestor,
+
         features.same_speaker,
         features.alias,
         features.sentence_distance,
@@ -190,7 +199,12 @@ testing_corpus = corpora.Corpus.from_file(
     codecs.open(args.input_filename, "r", "utf-8"))
 
 logging.info("Extracting system mentions.")
+
+dummy_counter_for_test = 0
 for doc in testing_corpus:
+    if dummy_counter_for_test % 100 == 99:
+        logging.info("We are extracting doc " + str(dummy_counter_for_test) + ": " + doc.identifier)
+    dummy_counter_for_test += 1
     doc.system_mentions = mention_extractor.extract_system_mentions(doc)
 
 mention_entity_mapping, antecedent_mapping = experiments.predict(
@@ -199,6 +213,8 @@ mention_entity_mapping, antecedent_mapping = experiments.predict(
     perceptron,
     import_helper.import_from_path(args.clusterer)
 )
+
+
 
 testing_corpus.read_coref_decisions(mention_entity_mapping, antecedent_mapping)
 
