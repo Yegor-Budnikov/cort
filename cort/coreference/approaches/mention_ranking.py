@@ -44,7 +44,7 @@ References:
 
 
 from cort.coreference import perceptrons
-
+import numpy
 
 __author__ = 'martscsn'
 
@@ -94,7 +94,7 @@ def extract_substructures(doc):
 
 class RankingPerceptron(perceptrons.Perceptron):
     """ A perceptron for mention ranking with latent antecedents. """
-    def argmax(self, substructure, arc_information):
+    def argmax(self, substructure, arc_information, weight_mask): #new variable
         """ Decoder for mention ranking with latent antecedents.
 
         Compute highest-scoring antecedent and highest-scoring antecedent
@@ -140,8 +140,10 @@ class RankingPerceptron(perceptrons.Perceptron):
                 - **is_consistent** (*bool*): whether the highest-scoring
                   antecedent decision is consistent with the gold information.
         """
+
         best, max_val, best_cons, max_cons, best_is_consistent = \
-            self.find_best_arcs(substructure, arc_information)
+            self.find_best_arcs(substructure, arc_information, weight_mask) #new variable
+
 
         return (
             [best],
@@ -157,7 +159,7 @@ class RankingPerceptron(perceptrons.Perceptron):
 class RankingPerceptronClosest(perceptrons.Perceptron):
     """ A perceptron for mention ranking with closest antecedents for training.
     """
-    def argmax(self, substructure, arc_information):
+    def argmax(self, substructure, arc_information, weight_mask): #new variable
         """ Decoder for mention ranking with closest antecedents for training.
 
         Compute highest-scoring antecedent and closest gold antecedent for one
@@ -202,6 +204,7 @@ class RankingPerceptronClosest(perceptrons.Perceptron):
                 - **is_consistent** (*bool*): whether the highest-scoring
                   antecedent decision is consistent with the gold information.
         """
+
         max_val = float("-inf")
         best = None
 
@@ -211,7 +214,7 @@ class RankingPerceptronClosest(perceptrons.Perceptron):
         best_is_consistent = False
 
         for arc in substructure:
-            score = self.score_arc(arc, arc_information)
+            score = self.score_arc(arc, arc_information, weight_mask) #new variable
             consistent = arc_information[arc][2]
 
             if score > max_val:

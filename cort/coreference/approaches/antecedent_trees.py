@@ -76,7 +76,7 @@ def extract_substructures(doc):
 
 class AntecedentTreePerceptron(perceptrons.Perceptron):
     """ A perceptron for antecedent trees. """
-    def argmax(self, substructure, arc_information):
+    def argmax(self, substructure, arc_information, weight_mask): #new variable
         """ Decoder for antecedent trees.
 
         Compute highest-scoring antecedent tree and highest-scoring antecedent
@@ -140,7 +140,7 @@ class AntecedentTreePerceptron(perceptrons.Perceptron):
 
             best, max_val, best_cons, max_cons, best_is_consistent = \
                 self.find_best_arcs(substructure[first_arc:last_arc],
-                                    arc_information)
+                                    arc_information, weight_mask) #new variable
 
             arcs.append(best)
             arcs_scores.append(max_val)

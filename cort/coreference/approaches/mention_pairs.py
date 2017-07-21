@@ -110,7 +110,7 @@ def extract_testing_substructures(doc):
 
 class MentionPairsPerceptron(perceptrons.Perceptron):
     """ A perceptron for the mention pair model. """
-    def argmax(self, substructure, arc_information):
+    def argmax(self, substructure, arc_information, weight_mask): #new variable
         """ Decoder for the mention pair model.
 
         Compute highest-scoring label for a pair and the correct label for a
@@ -153,8 +153,8 @@ class MentionPairsPerceptron(perceptrons.Perceptron):
         arc = substructure[0]
         consistent = arc_information[arc][2]
 
-        score_coref = self.score_arc(arc, arc_information, "+")
-        score_non_coref = self.score_arc(arc, arc_information, "-")
+        score_coref = self.score_arc(arc, arc_information, weight_mask, "+") #new variable
+        score_non_coref = self.score_arc(arc, arc_information, weight_mask, "-") #new variable
 
         if score_coref >= score_non_coref:
             label = "+"

@@ -17,7 +17,7 @@ __author__ = 'smartschat'
 
 cdef class Perceptron:
     cdef int n_iter, random_seed
-    cdef double cost_scaling
+    cdef double cost_scaling, input_dropout_percent, weight_dropout_percent # !!! NEW PARAMETERS
     cdef dict priors, weights, label_to_index
     """ Provide a latent structured perceptron.
 
@@ -37,7 +37,10 @@ cdef class Perceptron:
             for each feature seen during training (for representing the
             features we employ *feature hashing*). If the graphs employed are
             not labeled, ``l`` is set to "+".
-
+        input_dropout_percent (double): The parameter for dropout input layer.
+            Defaults to 0.0.
+        weight_dropout_percent (double): The parameter for dropout hidden layer.
+            Defaults to 0.0.
     """
 
     def __init__(self,
@@ -46,7 +49,9 @@ cdef class Perceptron:
                  cost_scaling=1,
                  priors=None,
                  weights=None,
-                 cluster_features=None):
+                 cluster_features=None,
+                 input_dropout_percent=0.0,
+                 weight_dropout_percent=0.0):
         """
         Initialize the perceptron.
 
@@ -72,6 +77,9 @@ cdef class Perceptron:
         self.n_iter = n_iter
         self.random_seed = seed
         self.cost_scaling = cost_scaling
+
+        self.input_dropout_percent = input_dropout_percent
+        self.weight_dropout_percent = weight_dropout_percent
 
         labels = self.get_labels()
 
@@ -154,11 +162,16 @@ cdef class Perceptron:
 
         for epoch in range(1, self.n_iter+1):
             logging.info("Started epoch " + str(epoch))
-            numpy.random.shuffle(indices)
+
+            fitting_indices = numpy.random.choice(indices, size=int(len(substructures)*(1 - self.input_dropout_percent)), replace=False)
 
             incorrect = 0
 
-            for i in indices:
+            weight_mask = numpy.ones(len(cached_weights["+"]))
+            weight_mask = numpy.random.binomial([weight_mask], 1 - self.weight_dropout_percent)[0]
+
+            for i in fitting_indices:
+
                 substructure = substructures[i]
 
                 (arcs,
@@ -168,7 +181,8 @@ cdef class Perceptron:
                  cons_labels,
                  cons_scores,
                  is_consistent) = self.argmax(substructure,
-                                              arc_information)
+                                              arc_information, weight_mask) #new variable
+
 
                 if not is_consistent:
                     self.__update(cons_arcs,
@@ -178,7 +192,8 @@ cdef class Perceptron:
                                   arc_information,
                                   counter,
                                   cached_priors,
-                                  cached_weights)
+                                  cached_weights,
+                                  weight_mask) #new variable
 
                     incorrect += 1
 
@@ -225,11 +240,11 @@ cdef class Perceptron:
         arcs = []
         labels = []
         scores = []
-
+        weight_mask = numpy.ones(len(self.weights["+"]), dtype=numpy.int)
         for substructure in substructures:
             (substructure_arcs, substructure_arcs_labels,
              substructure_arcs_scores, _, _, _, _) = self.argmax(
-                substructure, arc_information)
+                substructure, arc_information, weight_mask)
 
             arcs.append(substructure_arcs)
             labels.append(substructure_arcs_labels)
@@ -237,7 +252,7 @@ cdef class Perceptron:
 
         return arcs, labels, scores
 
-    def argmax(self, substructure, arc_information):
+    def argmax(self, substructure, arc_information, weight_mask): #new variable
         """ Decoder for coreference resolution.
 
         Compute highest-scoring substructure and highest-scoring constrained
@@ -285,7 +300,7 @@ cdef class Perceptron:
         raise NotImplementedError()
 
     def __update(self, good_arcs, bad_arcs, good_labels, bad_labels,
-                 arc_information, counter, cached_priors, cached_weights):
+                 arc_information, counter, cached_priors, cached_weights, weight_mask): #новая переменная 
 
         if good_labels or bad_labels:
             for arc, label in zip(good_arcs, good_labels):
@@ -298,7 +313,8 @@ cdef class Perceptron:
                                numeric_features,
                                numeric_vals,
                                1.0,
-                               1.0*counter)
+                               1.0*counter, 
+                               weight_mask) #new variable
 
                 self.priors[label] += 1
                 cached_priors[label] += counter
@@ -313,7 +329,8 @@ cdef class Perceptron:
                                numeric_features,
                                numeric_vals,
                                -1.0,
-                               -1.0*counter)
+                               -1.0*counter,
+                               weight_mask) #new variable
 
                 self.priors[label] -= 1
                 cached_priors[label] -= counter
@@ -328,7 +345,8 @@ cdef class Perceptron:
                                numeric_features,
                                numeric_vals,
                                1.0,
-                               1.0*counter)
+                               1.0*counter,
+                               weight_mask) #new variable
 
             for arc in bad_arcs:
                 nonnumeric_features, numeric_features, numeric_vals = \
@@ -340,7 +358,9 @@ cdef class Perceptron:
                                numeric_features,
                                numeric_vals,
                                -1.0,
-                               -1.0*counter)
+                               -1.0*counter,
+                               weight_mask) #new variable
+
 
     def get_labels(self):
         """ Get the graph labels employed by the current approach.
@@ -365,7 +385,7 @@ cdef class Perceptron:
         """
         return ["+"]
 
-    def find_best_arcs(self, arcs, arc_information, label="+"):
+    def find_best_arcs(self, arcs, arc_information, weight_mask, label="+"): #new variable
         """ Find the highest-scoring arc and arc consistent with the gold
         information among a set of arcs.
 
@@ -403,6 +423,7 @@ cdef class Perceptron:
                   anaphor-antecedent decision is consistent with the gold
                   information.
         """
+
         max_val = float("-inf")
         best = None
 
@@ -422,7 +443,8 @@ cdef class Perceptron:
                                       costs[self.label_to_index[label]],
                                       nonnumeric_features,
                                       numeric_features,
-                                      numeric_vals)
+                                      numeric_vals,
+                                      weight_mask) #new variable
 
             if score > max_val:
                 best = arc
@@ -435,7 +457,7 @@ cdef class Perceptron:
 
         return best, max_val, best_cons, max_cons, best_is_consistent
 
-    def score_arc(self, arc, arc_information, label="+"):
+    def score_arc(self, arc, arc_information,  weight_mask, label="+"): #new variable
         """ Score an arc according to priors, weights and costs.
 
         Args:
@@ -468,7 +490,8 @@ cdef class Perceptron:
             costs[self.label_to_index[label]],
             nonnumeric_features,
             numeric_features,
-            numeric_vals
+            numeric_vals,
+            weight_mask #new variable
         )
 
     def get_model(self):
@@ -501,8 +524,7 @@ cdef class Perceptron:
                                   double costs,
                                   numpy.uint32_t[:] nonnumeric_features,
                                   numpy.uint32_t[:] numeric_features,
-                                  float[:] numeric_vals):
-
+                                  float[:] numeric_vals, long[:] weight_mask): #new variable
         cdef double score = 0.0
         cdef int index = 0
 
@@ -510,10 +532,13 @@ cdef class Perceptron:
         score += cost_scaling * costs
 
         for index in range(nonnumeric_features.shape[0]):
-            score += weights[nonnumeric_features[index]]
+            if (weight_mask[nonnumeric_features[index]]):
+                score += weights[nonnumeric_features[index]]
+
 
         for index in range(numeric_features.shape[0]):
-            score += weights[numeric_features[index]]*numeric_vals[index]
+            if (weight_mask[numeric_features[index]]):
+                score += weights[numeric_features[index]]*numeric_vals[index]
 
         return score
 
@@ -526,19 +551,22 @@ cdef class Perceptron:
                              numpy.uint32_t[:] numeric_features,
                              float[:] numeric_vals,
                              double update_val_for_weights,
-                             double update_val_for_cached_weights):
+                             double update_val_for_cached_weights,
+                             int[:] weight_mask):
         cdef int index
 
         for index in range(nonnumeric_features.shape[0]):
-            weights[nonnumeric_features[index]] += update_val_for_weights
-            cached_weights[nonnumeric_features[index]] += \
-                update_val_for_cached_weights
+            if weight_mask[nonnumeric_features[index]]:
+                weights[nonnumeric_features[index]] += update_val_for_weights
+                cached_weights[nonnumeric_features[index]] += \
+                    update_val_for_cached_weights
 
         for index in range(numeric_features.shape[0]):
-            weights[numeric_features[index]] += \
-                update_val_for_weights*numeric_vals[index]
-            cached_weights[numeric_features[index]] += \
-                update_val_for_cached_weights*numeric_vals[index]
+            if weight_mask[numeric_features[index]]:
+                weights[numeric_features[index]] += \
+                    update_val_for_weights*numeric_vals[index]
+                cached_weights[numeric_features[index]] += \
+                    update_val_for_cached_weights*numeric_vals[index]
 
     @cython.boundscheck(False)
     @cython.wraparound(False)

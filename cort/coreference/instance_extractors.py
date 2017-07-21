@@ -485,4 +485,30 @@ class InstanceExtractor:
                   in numeric_features])
         numeric_vals = array.array("f", [val for _, val in numeric_features])
 
+        # features hashes
+        # for word in inst_feats:
+        #     self.feature_table.add((word, mmh3.hash(word.encode("utf-8")) & 2 ** 24 - 1 ))
+        # for word, _ in numeric_features:
+        #     self.feature_table.add((word, mmh3.hash(word.encode("utf-8")) & 2 ** 24 - 1 ))
+        # for _, val in numeric_features:
+        #     self.feature_table.add((val, val))
+
+        # features counters
+        # self.feature_counter = {}
+        # for word in inst_feats:
+        #     if word in self.feature_counter.keys():
+        #         self.feature_counter[word] += 1
+        #     else:
+        #         self.feature_counter[word] = 1
+        # for word, _ in numeric_features:
+        #     if word in self.feature_counter.keys():
+        #         self.feature_counter[word] += 1
+        #     else:
+        #         self.feature_counter[word] = 1
+        # for _, val in numeric_features:
+        #     if val in self.feature_counter.keys():
+        #         self.feature_counter[val] += 1
+        #     else:
+        #         self.feature_counter[val] = 1
+
         return all_nonnumeric_feats, all_numeric_feats, numeric_vals

@@ -83,7 +83,13 @@ def parse_args():
                         help='The file containing the list of features. If not'
                              'provided, defaults to a standard set of'
                              'features.')
-
+    parser.add_argument('-dropout_input',
+                        dest='dropout_input',
+                        help='The percentage of input data to drop out.')
+    parser.add_argument('-dropout_hidden_layer',
+                        dest='dropout_hidden_layer',
+                        help='The percentage of neurons in the hidden layer to'
+                             'drop out.')
     return parser.parse_args()
 
 # Copy-paste!
@@ -193,7 +199,9 @@ else:
 perceptron = import_helper.import_from_path(args.perceptron)(
     cost_scaling=int(args.cost_scaling),
     n_iter=int(args.n_iter),
-    seed=int(args.seed)
+    seed=int(args.seed),
+    input_dropout_percent=float(args.dropout_input),
+    weight_dropout_percent=float(args.dropout_hidden_layer)
 )
 
 extractor = instance_extractors.InstanceExtractor(
@@ -246,7 +254,6 @@ if args.input_filename:
     print(get_scores(args.output_filename, args.input_filename))
 
 logging.info("Done.")
-
 
 
 logging.info("Writing model to file.")

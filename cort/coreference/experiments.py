@@ -32,11 +32,12 @@ def learn(training_corpus, instance_extractor, perceptron, coref_extractor):
               features we employ *feature hashing*). If the graphs employed are
               not labeled, ``l`` is set to "+".
     """
-    logging.info("Learning.")
+    logging.info("\tLearning.")
 
     logging.info("\tVerifying attributes.")
     for doc in training_corpus:
         doc.antecedent_decisions = {}
+        #print(doc, doc.antecedent_decisions)
         for mention in doc.system_mentions:
             if not "antecedent" in mention.attributes.keys():
                 mention.attributes["antecedent"] = None
