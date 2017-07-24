@@ -287,10 +287,9 @@ def preceding_token(mention):
         The tuple ('preceding', TOKEN), where TOKEN is the (lowercased) token
         preceding the mention. If no such token exists, set TOKEN to 'NONE'.
     """
-    prec = mention.get_context(-1)
 
-    if prec:
-        return "preceding", prec[0].lower()
+    if "preceding_token" in mention.attributes.keys():
+        return "preceding", mention.attributes["preceding_token"].lower()
     else:
         return "preceding", "NONE"
 
@@ -305,12 +304,12 @@ def next_token(mention):
         The tuple ('next', TOKEN), where TOKEN is the (lowercased) token
         following the mention. If no such token exists, set TOKEN to 'NONE'.
     """
-    next_t = mention.get_context(1)
 
-    if next_t:
-        return "next", next_t[0].lower()
+    if "next_token" in mention.attributes.keys():
+        return "next", mention.attributes["next_token"].lower()
     else:
         return "next", "NONE"
+
 
 
 def ancestry(mention):

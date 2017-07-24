@@ -219,20 +219,15 @@ def post_process_pleonastic_pronoun(system_mentions):
     filtered = []
 
     for mention in system_mentions:
-        if " ".join(mention.attributes["tokens"]).lower() == "it":
-            context_two = mention.get_context(2)
-            context_three = mention.get_context(3)
-
-            if context_two is not None:
-                if context_two[-1] == "that":
-                    continue
+        if " ".join(mention.attributes["tokens"]).lower() == "it" and "next_three_tokens" in mention.attributes.keys():
+            context_three = mention.attributes["next_three_tokens"]
 
             if context_three is not None:
-                if context_three[-1] == "that":
+                if context_three[-1] == "that" or context_three[-2] == "that":
                     continue
 
         if " ".join(mention.attributes["tokens"]).lower() == "you":
-            if mention.get_context(1) == ["know"]:
+            if "next_token" in mention.attributes.keys() and mention.attributes["next_token"] == "know":
                 continue
 
         filtered.append(mention)

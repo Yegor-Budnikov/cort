@@ -138,6 +138,16 @@ class Mention:
             "first_in_gold_entity": first_in_gold_entity
         }
 
+
+        if span.begin > 0:
+            attributes["preceding_token"] = document.tokens[span.begin - 1]
+
+        if span.end + 1 < len(document.tokens):
+            attributes["next_token"] = document.tokens[span.end + 1]
+
+        if span.end + 3 < len(document.tokens):
+            attributes["next_three_tokens"] = document.tokens[span.end:span.end + 3]
+
         #if Document is SemanticCoNLLDocument then:
         if hasattr(document, 'compreno_sem_class'):
             attributes["compreno_sem_class"] = document.compreno_sem_class[span.begin:span.end + 1]
@@ -297,27 +307,27 @@ class Mention:
                 ": " +
                 str(self.attributes["tokens"]))
 
-    def get_context(self, window):
-        """ Get the context in a window around the mention.
-
-        Args:
-            window (int): An integer specifying the size of the window.
-
-        Returns:
-            list(str): The tokens in a window of around the mention.
-
-            In particular, get ``window`` tokens to the right or left of the
-            mention,, depending on the sign of ``window``: if the sign is +,
-            then to the right, if the sign is -, then to the left. Return
-            None if the window is not contained in the document.
-        """
-        if window < 0 <= window + self.span.begin:
-            return self.document.tokens[
-                self.span.begin + window:self.span.begin]
-        elif (window > 0 and self.span.end + window + 1
-                <= len(self.document.tokens)):
-            return self.document.tokens[
-                self.span.end + 1:self.span.end + window + 1]
+    # def get_context(self, window):
+    #     """ Get the context in a window around the mention.
+    #
+    #     Args:
+    #         window (int): An integer specifying the size of the window.
+    #
+    #     Returns:
+    #         list(str): The tokens in a window of around the mention.
+    #
+    #         In particular, get ``window`` tokens to the right or left of the
+    #         mention,, depending on the sign of ``window``: if the sign is +,
+    #         then to the right, if the sign is -, then to the left. Return
+    #         None if the window is not contained in the document.
+    #     """
+    #     if window < 0 <= window + self.span.begin:
+    #         return self.document.tokens[
+    #             self.span.begin + window:self.span.begin]
+    #     elif (window > 0 and self.span.end + window + 1
+    #             <= len(self.document.tokens)):
+    #         return self.document.tokens[
+    #             self.span.end + 1:self.span.end + window + 1]
 
     def is_coreferent_with(self, m):
         """ Return whether this mention is coreferent with another mention.
