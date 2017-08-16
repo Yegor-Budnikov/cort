@@ -3,6 +3,8 @@
 from cort.core import mention_property_computer
 from cort.core import spans
 
+import pickle
+import nltk
 
 __author__ = 'smartschat'
 
@@ -88,7 +90,8 @@ class Mention:
                 attribute values (see the class documentation for more
                 information).
         """
-        self.document = document
+        if document != None:
+            self.document_id = document.identifier
         self.span = span
         self.attributes = attributes
 
@@ -125,13 +128,15 @@ class Mention:
 
         i, sentence_span = document.get_sentence_id_and_span(span)
 
+        subtree = mention_property_computer.get_relevant_parented_subtree(span, document)
+
         attributes = {
             "tokens": document.tokens[span.begin:span.end + 1],
             "pos": document.pos[span.begin:span.end + 1],
             "ner": document.ner[span.begin:span.end + 1],
             "sentence_id": i,
-            "parse_tree": mention_property_computer.get_relevant_subtree(
-                span, document),
+            "parse_tree": nltk.Tree.fromstring(str(subtree)),
+            "parent_parse_tree": nltk.Tree.fromstring(str(subtree.parent())),
             "speaker": document.speakers[span.begin],
             "antecedent": None,
             "set_id": None,
@@ -215,6 +220,7 @@ class Mention:
 
         attributes["deprel"] = dep_tree[index].deprel
 
+
         return Mention(document, span, attributes)
 
     @staticmethod
@@ -276,7 +282,7 @@ class Mention:
             span.
         """
         if isinstance(other, self.__class__):
-            return self.span == other.span and self.document == other.document
+            return self.span == other.span and self.document_id == other.document_id
         else:
             return False
 
@@ -284,24 +290,24 @@ class Mention:
         return not self.__eq__(other)
 
     def __hash__(self):
-        if self.document is None:
+        if self.document_id is None:
             return hash((self.span.begin, self.span.end))
         elif self.span is None:
-            return hash(self.document.identifier)
+            return hash(self.document_id)
         else:
-            return hash((self.document.identifier,
+            return hash((self.document_id,
                          self.span.begin,
                          self.span.end))
 
     def __str__(self):
-        return (repr(self.document) +
+        return (self.document_id +
                 ", " +
                 str(self.span) +
                 ": "
                 + " ".join(self.attributes["tokens"]))
 
     def __repr__(self):
-        return (repr(self.document) +
+        return (self.document_id +
                 ", " +
                 str(self.span) +
                 ": " +
@@ -343,14 +349,14 @@ class Mention:
         self_set_id = self.attributes['annotated_set_id']
         m_set_id = m.attributes['annotated_set_id']
 
-        if self.document is None and m.document is None:
+        if self.document_id is None and m.document_id is None:
             return self_set_id is not None and self_set_id == m_set_id
         elif self.is_dummy():
             return m.is_dummy()
         elif m.is_dummy():
             return self.is_dummy()
         else:
-            return self.document == m.document \
+            return self.document_id == m.document_id \
                 and self_set_id is not None \
                 and self_set_id == m_set_id
 

@@ -36,6 +36,9 @@ class Corpus:
         """
         self.description = description
         self.documents = corpus_documents
+        self.doc_map = {}
+        for doc in self.documents:
+            self.doc_map[doc.identifier] = doc
 
     def __iter__(self):
         """Return an iterator over documents in the corpus.
@@ -169,7 +172,7 @@ class Corpus:
                     if antecedent_mapping and mention in antecedent_mapping:
                         antecedent = antecedent_mapping[mention]
                         mention.attributes['antecedent'] = antecedent
-                        mention.document.antecedent_decisions[mention.span] = \
+                        self.doc_map[mention.document_id].antecedent_decisions[mention.span] = \
                             antecedent.span
 
     def get_antecedent_decisions(self, which_mentions="annotated"):
@@ -225,12 +228,12 @@ class Corpus:
             True if ``m`` and ``n`` are coreferent according to the annotation
             present in this corpus, False otherwise.
         """
-        if m.document != n.document:
+        if m.document_id != n.document_id:
             return False
-        elif m.document not in self.documents:
+        elif self.doc_map[m.document_id] not in self.documents:
             return False
         else:
-            doc = self.documents[self.documents.index(m.document)]
+            doc = self.doc_map[m.document_id]
 
             if m.span not in doc.spans_to_annotated_mentions or \
                n.span not in doc.spans_to_annotated_mentions:

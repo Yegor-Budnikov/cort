@@ -90,7 +90,7 @@ class Document(object):
             self.tokens += tokens
             self.pos += pos
             self.ner += ner
-            self.parse.append(nltk.ParentedTree.fromstring(parse))
+            self.parse.append(nltk.Tree.fromstring(parse))
             self.dep.append(dep)
             self.speakers += speakers
 

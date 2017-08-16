@@ -3,7 +3,7 @@
 __author__ = 'smartschat'
 
 
-def best_first(substructures, labels, scores, coref_labels):
+def best_first(substructures, labels, scores, coref_labels, doc_map):
     """ Extract coreference clusters from coreference predictions via best-first
     clustering.
 
@@ -59,7 +59,7 @@ def best_first(substructures, labels, scores, coref_labels):
                 antecedent_mapping[anaphor] = best
                 if best not in mention_entity_mapping:
                     mention_entity_mapping[best] = \
-                        best.document.system_mentions.index(best)
+                        doc_map[best.document_id].system_mentions.index(best)
 
                 mention_entity_mapping[anaphor] = \
                     mention_entity_mapping[best]
@@ -77,7 +77,7 @@ def best_first(substructures, labels, scores, coref_labels):
         antecedent_mapping[anaphor] = best
         if best not in mention_entity_mapping:
             mention_entity_mapping[best] = \
-                best.document.system_mentions.index(best)
+                doc_map[best.document_id].system_mentions.index(best)
 
         mention_entity_mapping[anaphor] = \
             mention_entity_mapping[best]
@@ -85,7 +85,7 @@ def best_first(substructures, labels, scores, coref_labels):
     return mention_entity_mapping, antecedent_mapping
 
 
-def all_ante(substructures, labels, scores, coref_labels):
+def all_ante(substructures, labels, scores, coref_labels, doc_map):
     """ Extract coreference clusters from coreference predictions via transitive
     closure.
 
@@ -124,7 +124,7 @@ def all_ante(substructures, labels, scores, coref_labels):
             if antecedent not in mention_entity_mapping:
                 # chain id: index of antecedent in system mentions
                 mention_entity_mapping[antecedent] = \
-                        antecedent.document.system_mentions.index(antecedent)
+                        doc_map[antecedent.document_id].system_mentions.index(antecedent)
 
             # assign id based on antecedent
             mention_entity_mapping[anaphor] = \

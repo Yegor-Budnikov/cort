@@ -44,6 +44,7 @@ def learn(training_corpus, instance_extractor, perceptron, coref_extractor):
             if not "set_id" in mention.attributes.keys():
                 mention.attributes["set_id"] = None
 
+
     logging.info("\tExtracting instances and features.")
     substructures, arc_information = instance_extractor.extract(training_corpus)
 
@@ -78,7 +79,7 @@ def learn(training_corpus, instance_extractor, perceptron, coref_extractor):
 
     logging.info("\tClustering results.")
 
-    mention_entity_mapping, antecedent_mapping = coref_extractor(arcs, labels, scores, perceptron.get_coref_labels())
+    mention_entity_mapping, antecedent_mapping = coref_extractor(arcs, labels, scores, perceptron.get_coref_labels(), training_corpus.doc_map)
 
     return perceptron.get_model(), mention_entity_mapping, antecedent_mapping
     # return perceptron.get_model(), coref_extractor(arcs, labels, scores, perceptron.get_coref_labels())
@@ -127,4 +128,4 @@ def predict(testing_corpus,
 
     logging.info("\tClustering results.")
 
-    return coref_extractor(arcs, labels, scores, perceptron.get_coref_labels())
+    return coref_extractor(arcs, labels, scores, perceptron.get_coref_labels(), testing_corpus.doc_map)
