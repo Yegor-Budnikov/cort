@@ -52,9 +52,9 @@ data_sets = ["new_test_compreno"]
 
 subprocess.call([
     "C:\\Anaconda\\python.exe",
-    "E:\\buML\\cort\\src\\scripts\\cort-dump.py",
+    "E:\\buML\\cort\\copy2\\scripts\\cort-dump.py",
     "-in", "E:\\buML\\cort\\data\\sets\\short_new_train_compreno.gold",
     "-out", "dump-" + "pair" + "-output.pickle",
     "-extractor", get_extractor("train", "pair"),
-    "-perceptron", get_perceptron("pair"),
+    # "-perceptron", get_perceptron("pair"),
     "-clusterer", get_clusterer("pair")])

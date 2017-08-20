@@ -1,7 +1,7 @@
 """ Extract instances and features from a corpus. """
 
 import array
-import multiprocessing
+from multiprocess import Pool
 import sys
 import logging
 
@@ -173,14 +173,15 @@ class InstanceExtractor:
             debug_number_iterator += 1
         # logging.info("\tWe have finished\n")
 
-        # pool = multiprocessing.Pool(maxtasksperchild=1)
+        # pool = Pool(processes=4)
         #
-        # if sys.version_info[0] == 2:
-        #     results = pool.map(unwrap_extract_doc,
-        #                        zip([self] * len(corpus.documents),
-        #                            corpus.documents))
-        # else:
-        #     results = pool.map(self._extract_doc, corpus.documents)
+        # # if sys.version_info[0] == 2:
+        # #     results = pool.map(unwrap_extract_doc,
+        # #                        zip([self] * len(corpus.documents),
+        # #                            corpus.documents))
+        # # else:
+        # #     results = pool.map(self._extract_doc, corpus.documents)
+        # results = pool.map(self._extract_doc, corpus.documents)
         #
         # pool.close()
         # pool.join()

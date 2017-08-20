@@ -92,10 +92,48 @@ def compreno_sem_class(mention):
     """
 
     res = []
-    for sc in mention.attributes["compreno_sem_path"][0].split(':'):
+
+    head_index = mention.attributes["head_index"]
+
+    for sc in mention.attributes["compreno_sem_path"][head_index].split(':'):
         res.append(("compreno_sem_class", sc))
     return res
     # return "compreno_sem_class", mention.attributes["compreno_sem_class"]
+
+def compreno_left_neighbor_sem_class(mention):
+    """ Compute semantic class of a left neighbor of a mention provided with Compreno.
+
+    Args:
+         mention (Mention): A mention.
+
+    Returns:
+        The tuple ('compreno_left_neighbor_sem_class', SEM_CLASS), where SEM_CLASS is one of
+        semantic classes.
+    """
+    if "compreno_left_neighbor_sem_class" in mention.attributes.keys():
+
+        res = []
+
+        for sc in mention.attributes["compreno_left_neighbor_sem_class"].split(':'):
+            res.append(("compreno_left_neighbor_sem_class", sc))
+        return res
+
+def compreno_right_neighbor_sem_class(mention):
+    """ Compute semantic class of a right neighbor of a mention provided with Compreno.
+
+    Args:
+         mention (Mention): A mention.
+
+    Returns:
+        The tuple ('compreno_right_neighbor_sem_class', SEM_CLASS), where SEM_CLASS is one of
+        semantic classes.
+    """
+    if "compreno_right_neighbor_sem_class" in mention.attributes.keys():
+        res = []
+
+        for sc in mention.attributes["compreno_right_neighbor_sem_class"].split(':'):
+            res.append(("compreno_right_neighbor_sem_class", sc))
+        return res
 
 def compreno_surf_slot(mention):
     """ Compute surface slot of a mention provided with Compreno.

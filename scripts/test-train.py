@@ -61,62 +61,29 @@ for system in systems:
     print("Training", system, "on train.")
     subprocess.call([
         "C:\\Anaconda\\python.exe",
-        "E:\\buML\\cort\\src\\bin\\cort-train",
-        # "-in", "E:\\buML\\cort\\data\\sets\\train+dev-english.gold",
-        # "-out", "E:\\buML\\cort\\data\\models\\model-" + system + "-train+dev.obj",
+        "E:\\buML\\cort\\copy2\\bin\\cort-train",
         "-in", "E:\\buML\\cort\\data\\sets\\short_new_train_compreno.gold",
-        "-out", "E:\\buML\\cort\\data\\models\\short_new_model-" + system + "-train_compreno.obj",
+        "-out", "E:\\buML\\cort\\data\\models\\deleting_document\\short_new_model-" + system + "-train_compreno.obj",
         "-ante", "train.output.antecedents",
         "-extractor", get_extractor("train", system),
         "-perceptron", get_perceptron(system),
         "-clusterer", get_clusterer(system),
-        "-n_iter", "20",
+        "-n_iter", "5",
+        "-dropout_input", "0",
+        "-dropout_hidden_layer", "0",
         "-cost_function", get_cost_function(system),
         "-cost_scaling", "100"])
 
-    # print("Training", system, "on train+dev.")
     # subprocess.call([
     #     "C:\\Anaconda\\python.exe",
-    #     "E:\\buML\\cort\\src\\bin\\cort-train",
-    #     # "-in", "E:\\buML\\cort\\data\\sets\\train+dev-english.gold",
-    #     # "-out", "E:\\buML\\cort\\data\\models\\model-" + system + "-train+dev.obj",
-    #     "-in", "E:\\buML\\cort\\data\\sets\\pronoun_train+dev_compreno.gold",
-    #     "-out", "E:\\buML\\cort\\data\\models\\model-" + system + "-train+dev_compreno.obj",
-    #     "-extractor", get_extractor("train", system),
+    #     "E:\\buML\\cort\\copy2\\bin\\cort-predict-conll",
+    #     # "-in", "E:\\buML\\cort\\data\\sets\\short_new_train_compreno.gold",
+    #     # "-gold", "E:\\buML\\cort\\data\\sets\\short_new_train_compreno.gold",
+    #     "-in", "E:\\buML\\cort\\data\\sets\\short_new_train_compreno.gold",
+    #     "-gold", "E:\\buML\\cort\\data\\sets\\short_new_train_compreno.gold",
+    #     "-model", "E:\\buML\\cort\\data\\models\\deleting_document\\short_new_model-" + system + "-train_compreno.obj",
+    #     "-out", "E:\\buML\\cort\\data\\models\\deleting_document\\new_compreno_model-" + system + "-output",
+    #     "-ante", "E:\\buML\\cort\\data\\models\\deleting_document\\new_compreno_model-" + system + "-output.antecedents",
+    #     "-extractor", get_extractor("dev-english", system),
     #     "-perceptron", get_perceptron(system),
-    #     "-cost_function", get_cost_function(system),
-    #     "-cost_scaling", "100"])
-
-
-    # for data_set in data_sets:
-    #     print("Predicting", system, "on", data_set)
-    #     if data_set == "dev-english":
-    #         model = "E:\\buML\\cort\\data\\models\\model-" + system + "-train.obj"
-    #     else:
-    #         model = "E:\\buML\\cort\\data\\models\\model-" + system + "-train+dev.obj"
-    #
-    #     subprocess.call([
-    #         "C:\\Anaconda\\python.exe",
-    #         "E:\\buML\\cort\\src\\bin\\cort-predict-conll",
-    #         # "-in", "/home/redll/cort/my_test/" + data_set + ".auto",
-    #         # "-gold", "/home/redll/cort/my_test/" + data_set + ".gold",
-    #         "-in", "E:\\buML\\cort\\data\\sets\\" + data_set + ".auto",
-    #         "-gold", "E:\\buML\\cort\\data\\sets\\" + data_set + ".gold",
-    #         "-model", model,
-    #         "-out", "model-" + system + "-output",
-    #         "-ante", "output.antecedents",
-    #         "-extractor", get_extractor(data_set, system),
-    #         "-perceptron", get_perceptron(system),
-    #         "-clusterer", get_clusterer(system)])
-
-# subprocess.run([
-#     "/home/redll/cort/bin/cort-predict-conll",
-#     # "-in", "/home/redll/cort/my_test/" + data_set + ".auto",
-#     # "-gold", "/home/redll/cort/my_test/" + data_set + ".gold",
-#     "-in", "/home/redll/cort/my_test/" + data_set + "_short.auto",
-#     "-gold", "/home/redll/cort/my_test/" + data_set + "_short.gold",
-#     "-model", model,
-#     "-out", "model-" + system + "-output",
-#     "-extractor", get_extractor(data_set, system),
-#     "-perceptron", get_perceptron(system),
-#     "-clusterer", get_clusterer(system)])
+    #     "-clusterer", get_clusterer(system)])

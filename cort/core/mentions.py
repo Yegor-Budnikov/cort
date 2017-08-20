@@ -156,6 +156,10 @@ class Mention:
         #if Document is SemanticCoNLLDocument then:
         if hasattr(document, 'compreno_sem_class'):
             attributes["compreno_sem_class"] = document.compreno_sem_class[span.begin:span.end + 1]
+            if document.in_sentence_ids[span.begin] > 0:
+                attributes["compreno_left_neighbor_sem_class"] = document.compreno_sem_class[span.begin - 1]
+            if span.end + 1 < len(document.tokens) and document.in_sentence_ids[span.end + 1] > 0:
+                attributes["compreno_right_neighbor_sem_class"] = document.compreno_sem_class[span.end + 1]
         if hasattr(document, 'compreno_surf_slot'):
             attributes["compreno_surf_slot"] = document.compreno_surf_slot[span.begin:span.end + 1]
         if hasattr(document, 'compreno_sem_path'):

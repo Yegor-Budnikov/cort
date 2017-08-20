@@ -1,8 +1,10 @@
 from __future__ import print_function
 
 import subprocess
+import logging
 
-
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(''message)s')
 __author__ = 'yegor.budnikov'
 
 
@@ -50,40 +52,65 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-print(0)
 
-reference = corpora.Corpus.from_file("reference", open("E:\\buML\\cort\\data\\sets\\all that is not current\\test-english.gold"))
+logging.info("\t0\tExtracting reference")
 
-print(1)
+reference = corpora.Corpus.from_file("reference", open("E:\\buML\\cort\\data\\sets\\test-english.gold"))
 
-latent = corpora.Corpus.from_file("latent", open("model-latent-output"))
-# tree = corpora.Corpus.from_file("tree", open("tree-output.conll"))
 
-print(2)
+logging.info("\t1")
+'''
+logging.info("\tExtracting model-pair-output")
+pair = corpora.Corpus.from_file("pair", open("E:\\buML\\cort\\data\\results\\baseline\\model-pair-output"))
+
+logging.info("\tExtracting model-closest-output")
+closest = corpora.Corpus.from_file("closest", open("E:\\buML\\cort\\data\\results\\baseline\\model-closest-output"))
+'''
+logging.info("\tExtracting model-latent-output")
+latent = corpora.Corpus.from_file("latent", open("E:\\buML\\cort\\data\\results\\report_results\\WIN_model-latent-output_jul17"))
+latent_no_sem_class = corpora.Corpus.from_file("latent_no_sem_class", open("E:\\buML\\cort\\data\\results\\baseline\\model-latent-output"))
+
+'''
+logging.info("\tExtracting model-tree-output")
+tree = corpora.Corpus.from_file("tree", open("E:\\buML\\cort\\data\\results\\baseline\\model-tree-output"))
+
+'''
+logging.info("\t2")
 
 # optional -- not needed when you only want to compute recall errors
-latent.read_antecedents(open('model-latent-output.antecedents'))
+# pair.read_antecedents(open('E:\\buML\\cort\\data\\results\\baseline\\model-pair-output.antecedents'))
+# closest.read_antecedents(open('E:\\buML\\cort\\data\\results\\baseline\\model-closest-output.antecedents'))
+latent.read_antecedents(open('E:\\buML\\cort\\data\\results\\report_results\\WIN_model-latent-output_jul17.antecedents'))
+latent_no_sem_class.read_antecedents(open('E:\\buML\\cort\\data\\results\\baseline\\model-latent-output.antecedents'))
+# tree.read_antecedents(open('E:\\buML\\cort\\data\\results\\baseline\\model-tree-output.antecedents'))
 
 from cort.analysis import error_extractors
 from cort.analysis import spanning_tree_algorithms
 
-print(3)
+
+logging.info("\t3")
 extractor = error_extractors.ErrorExtractor(
     reference,
     spanning_tree_algorithms.recall_accessibility,
     spanning_tree_algorithms.precision_system_output
 )
 
-print(1)
 
+logging.info("\t1\textractor.add_system")
+
+#extractor.add_system(pair)
+#extractor.add_system(closest)
 extractor.add_system(latent)
+extractor.add_system(latent_no_sem_class)
+#extractor.add_system(tree)
 
-print(2)
+
+logging.info("\t2\textractor.get_errors")
 
 errors = extractor.get_errors()
 
 # print(errors)
-print(3)
+logging.info("\t3")
 
 # errors_by_type = errors.categorize(
 #     lambda error: error[0].attributes['semantic_class']
@@ -124,25 +151,44 @@ def is_anaphor_extracted(mention1, mention2):
     else:
         return "wat"
 
-errors_by_type = errors.categorize(lambda err: is_anaphor_extracted(err[0], err[1]))
+errors_by_type = errors.categorize(lambda err: err[0].attributes['type'][0])
+errors_by_gram = errors.categorize(lambda err: err[0].attributes['grammatical_function'][0])
 
+errors_by_type1 = errors.filter(lambda error: error[0].attributes['type'] == "NAM" and
+                                error[1].attributes['type'] == "NOM")
+
+
+logging.info("\t3\terrors_by_type")
 
 # print(errors_by_type)
 
-precision_errs = errors_by_type["latent"]["precision_errors"]["all"]
-recall_errs = errors_by_type["latent"]["recall_errors"]["all"]
+# precision_errs = errors_by_type["latent"]["precision_errors"]["all"]
+# recall_errs = errors_by_type["latent"]["recall_errors"]["all"]
+#
+# precision_errs_pair = errors_by_type["pair"]["precision_errors"]["all"]
+#recall_errs_pair = errors_by_type["pair"]["recall_errors"]["all"]
 
-dictt = dict()
-# print(precision_errs.keys())
-for key in precision_errs.keys():
-    dictt[key] = 0
-for key in recall_errs.keys():
-    dictt[key] = 0
+# precision_errs_closest = errors_by_type["closest"]["precision_errors"]["all"]
+#recall_errs_closest = errors_by_type["closest"]["recall_errors"]["all"]
 
-for key in precision_errs.keys():
-    dictt[key] += len(precision_errs[key])
-for key in recall_errs.keys():
-    dictt[key] += len(recall_errs[key])
+# precision_errs_latent = errors_by_type["latent"]["precision_errors"]["all"]
+recall_errs_latent = errors_by_gram["latent"]["recall_errors"]["all"]
+recall_errs_latent_no_sem_class = errors_by_gram["latent_no_sem_class"]["recall_errors"]["all"]
+
+# precision_errs_tree = errors_by_type["tree"]["precision_errors"]["all"]
+#recall_errs_tree = errors_by_type["tree"]["recall_errors"]["all"]
+
+# dictt = dict()
+# # print(precision_errs.keys())
+# for key in precision_errs.keys():
+#     dictt[key] = 0
+# for key in recall_errs.keys():
+#     dictt[key] = 0
+#
+# for key in precision_errs.keys():
+#     dictt[key] += len(precision_errs[key])
+# for key in recall_errs.keys():
+#     dictt[key] += len(recall_errs[key])
 
 # ante_is_spurius_in_extracted = precision_errs['ante_is_spurius_in_extracted']
 # is_extracted_and_gold = precision_errs['is_extracted_and_gold']
@@ -155,15 +201,15 @@ for key in recall_errs.keys():
 # mention_is_missing_in_extracted = recall_errs['mention_is_missing_in_extracted']
 # so_missing = recall_errs['so_missing']
 
-for key in dictt.keys():
-    print(key)
-    print(dictt[key])
-
-print('precision_errs')
-print(len(precision_errs))
-
-print('recall_errs')
-print(len(recall_errs))
+# for key in dictt.keys():
+#     print(key)
+#     print(dictt[key])
+#
+# logging.info("\tprecision_errs")
+# print(len(precision_errs))
+#
+# logging.info("\trecall_errs")
+# print(len(recall_errs))
 
 # print('is_extracted_and_gold')
 # print(len(is_extracted_and_gold) + len(rec_is_extracted_and_gold))
@@ -190,9 +236,33 @@ print(len(recall_errs))
 
 
 print('')
-print(4)
+logging.info("\t5\tvisualize")
 
+
+#errors_by_type.visualize("pair")
+#errors_by_type.visualize("closest")
 errors_by_type.visualize("latent")
+errors_by_type.visualize("latent_no_sem_class")
 
 
+#errors_by_type.visualize("tree")
+
+
+logging.info("\t6\tplot")
+
+from cort.analysis import plotting
+
+# plotting.plot(
+#     [("pair", [(cat, len(errs)) for cat, errs in recall_errs_pair.items()]),
+#      ("latent", [(cat, len(errs)) for cat, errs in recall_errs_latent.items()])],
+#     "Recall Errors",
+#     "Type of anaphor",
+#     "Number of Errors")
+plotting.plot(
+    [("sem_class_latent", [(cat, len(errs)) for cat, errs in recall_errs_latent.items()]),
+     ("no_sem_class_latent", [(cat, len(errs)) for cat, errs in recall_errs_latent_no_sem_class.items()])],
+    "Recall Errors",
+    "Type of anaphor",
+    "Number of Errors",
+    filename="E:\\buML\\cort\\data\\results\\report_results\\WIN_model-latent-output_jul17.png")
 print("!")

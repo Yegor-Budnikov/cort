@@ -51,7 +51,7 @@ def parse_args():
                         help='The function to extract instances.')
     parser.add_argument('-perceptron',
                         dest='perceptron',
-                        required=True,
+                        # required=True,
                         help='The perceptron to use.')
     parser.add_argument('-clusterer',
                         dest='clusterer',
@@ -185,19 +185,19 @@ else:
     ]
 
 
-perceptron = import_helper.import_from_path(args.perceptron)(
-    cost_scaling=int(args.cost_scaling),
-    n_iter=int(args.n_iter),
-    seed=int(args.seed)
-)
+# perceptron = import_helper.import_from_path(args.perceptron)(
+#     cost_scaling=int(args.cost_scaling),
+#     n_iter=int(args.n_iter),
+#     seed=int(args.seed)
+# )
 
-extractor = instance_extractors.InstanceExtractor(
-    import_helper.import_from_path(args.extractor),
-    mention_features,
-    pairwise_features,
-    cost_functions.null_cost,
-    perceptron.get_labels()
-)
+# extractor = instance_extractors.InstanceExtractor(
+#     import_helper.import_from_path(args.extractor),
+#     mention_features,
+#     pairwise_features,
+#     cost_functions.null_cost,
+#     perceptron.get_labels()
+# )
 
 logging.info("Reading in data.")
 training_corpus = corpora.Corpus.from_file("training", codecs.open(args.input_filename, "r", "utf-8"))
@@ -213,27 +213,27 @@ for doc in training_corpus:
     doc.system_mentions = mention_extractor.extract_system_mentions(doc)
 
 
-logging.info("\tVerifying attributes.")
-for doc in training_corpus:
-    doc.antecedent_decisions = {}
-    print(doc, doc.antecedent_decisions)
-    for mention in doc.system_mentions:
-        if not "antecedent" in mention.attributes.keys():
-            mention.attributes["antecedent"] = None
-        if not "set_id" in mention.attributes.keys():
-            mention.attributes["set_id"] = None
-
-logging.info("\tExtracting instances and features.")
-substructures, arc_information = extractor.extract(training_corpus)
-
-simplified_substructures = simplify_all_substructures(substructures)
-
-a,b,c = simplify_arc_information(arc_information)
-
-for i in a:
-    print (i)
-
-logging.info("Done.")
+# logging.info("\tVerifying attributes.")
+# for doc in training_corpus:
+#     doc.antecedent_decisions = {}
+#     print(doc, doc.antecedent_decisions)
+#     for mention in doc.system_mentions:
+#         if not "antecedent" in mention.attributes.keys():
+#             mention.attributes["antecedent"] = None
+#         if not "set_id" in mention.attributes.keys():
+#             mention.attributes["set_id"] = None
+#
+# logging.info("\tExtracting instances and features.")
+# substructures, arc_information = extractor.extract(training_corpus)
+#
+# simplified_substructures = simplify_all_substructures(substructures)
+#
+# a,b,c = simplify_arc_information(arc_information)
+#
+# for i in a:
+#     print (i)
+#
+# logging.info("Done.")
 
 
 

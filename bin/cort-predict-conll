@@ -75,13 +75,13 @@ def parse_args():
 
 def get_scores(output_data, gold_data):
     print(cort.__path__[0] + "\\reference-coreference-scorers\\v8.01\\scorer.pl")
-    print(os.getcwd() + "\\" + output_data)
+    print(output_data)
     scorer_output = subprocess.check_output([
         "E:\\buML\\Strawberry\\perl\\bin\\perl.exe",
         cort.__path__[0] + "\\reference-coreference-scorers\\v8.01\\scorer.pl",
         "all",
         gold_data,
-        os.getcwd() + "\\" + output_data,
+        output_data,
         "none"]).decode()
 
     metrics = ['muc', 'bcub', 'ceafm', 'ceafe', 'blanc']
@@ -144,6 +144,8 @@ else:
         features.sem_class,
 
         features.compreno_sem_class,
+        features.compreno_left_neighbor_sem_class,
+        features.compreno_right_neighbor_sem_class,
         features.compreno_surf_slot,
 
         features.deprel,
@@ -211,7 +213,7 @@ mention_entity_mapping, antecedent_mapping = experiments.predict(
     testing_corpus,
     extractor,
     perceptron,
-    import_helper.import_from_path(args.clusterer)
+    import_helper.import_from_path(args.clusterer),
 )
 
 

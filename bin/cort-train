@@ -163,6 +163,8 @@ else:
         features.sem_class,
 
         features.compreno_sem_class,
+        features.compreno_left_neighbor_sem_class,
+        features.compreno_right_neighbor_sem_class,
         features.compreno_surf_slot,
 
         features.deprel,
@@ -224,12 +226,30 @@ for doc in training_corpus:
         logging.info("We are extracting doc " + str(dummy_counter_for_train) + ": " + doc.identifier)
     dummy_counter_for_train += 1
     doc.system_mentions = mention_extractor.extract_system_mentions(doc)
+    # pickle.dump(doc.system_mentions, open("E:\\buML\\cort\\data\\models\\deleting_document\\" + str(dummy_counter_for_train) + ".train.corpus", "wb"), protocol=2)
+    # doc.system_mentions = pickle.load(open("E:\\buML\\cort\\data\\models\\deleting_document\\" + str(dummy_counter_for_train) + ".train.corpus", "rb"))
+
+    # logging.info(",")
+    # for mention in doc.system_mentions:
+    #     if "is_dummy" in mention.attributes.keys() and mention.attributes["is_dummy"]: continue
+    #     if features.next_token(mention)[1] != features.next_token2(mention)[1]:
+    #         logging.info("Next Token!!")
+    #         print ("Next Token!!", features.next_token(mention), features.next_token2(mention))
+    #     if features.preceding_token(mention)[1] != features.preceding_token2(mention)[1]:
+    #         logging.info("Preceding Token!!")
+    #         print("Preceding Token!!", features.preceding_token(mention), features.preceding_token2(mention))
+
+# logging.info("Writing corpus to file.")
+# pickle.dump(training_corpus, open("E:\\buML\\cort\\data\\models\\deleting_document\\train.corpus", "wb"), protocol=2)
+# 
+# training_corpus2 = pickle.load(open("E:\\buML\\cort\\data\\models\\deleting_document\\train.corpus", "rb"))
+# training_corpus = training_corpus2
 
 model, mention_entity_mapping, antecedent_mapping = experiments.learn(
     training_corpus,
     extractor,
     perceptron,
-    import_helper.import_from_path(args.clusterer)
+    import_helper.import_from_path(args.clusterer),
 )
 
 #
