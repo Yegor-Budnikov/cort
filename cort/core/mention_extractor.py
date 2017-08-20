@@ -5,10 +5,10 @@ import re
 
 from cort.core import mentions
 from cort.core import spans
-
+import nltk
 
 __author__ = 'smartschat'
-
+from multiprocessing.dummy import Process, Lock
 
 def extract_system_mentions(document, filter_mentions=True):
     """ Extract mentions from parse trees and named entity layers in a document.
@@ -32,6 +32,7 @@ def extract_system_mentions(document, filter_mentions=True):
         list(Mention): the sorted list of extracted system mentions. Includes a
         "dummy mention".
     """
+    # print("DEBUG pre extract spans")
     system_mentions = [mentions.Mention.from_document(span, document)
                        for span in __extract_system_mention_spans(document)]
 
@@ -68,6 +69,78 @@ def extract_system_mentions(document, filter_mentions=True):
     return system_mentions
 
 
+
+def extract_system_mentions_plus(document, filter_mentions=True):
+    """ Extract mentions from parse trees and named entity layers in a document.
+
+    Args:
+        document (ConLLDocument): The document from which mentions should be
+            extracted.
+        filter_mentions (bool): Indicates whether extracted mentions should
+            be filtered. If set to True, filters:
+
+                - mentions with the same head (retains one with largest span),
+                - mentions whose head is embedded in another mention's head,
+                - mentions whose head as POS tag JJ,
+                - mentions of namend entity type QUANTITY, CARDINAL, ORDINAL,
+                  MONEY or PERCENT,
+                - mentions "mm", "hmm", "ahem", "um", "US" and "U.S.",
+                - non-pronominal mentions embedded in appositions, and
+                - pleonastic "it" and "you" detected via heuristics
+
+    Returns:
+        list(Mention): the sorted list of extracted system mentions. Includes a
+        "dummy mention".
+    """
+    system_mentions = [mentions.Mention.from_document(span, document)
+                       for span in __extract_system_mention_spans(document)]
+
+    filtered = post_process_same_head_largest_span(system_mentions)
+    post_process_same_head_largest_span_list = [str(i) for i in system_mentions if i not in filtered]
+
+    filtered = post_process_embedded_head_largest_span(system_mentions)
+    post_process_embedded_head_largest_span_list = [str(i) for i in system_mentions if i not in filtered]
+
+    filtered = post_process_by_head_pos(system_mentions)
+    post_process_by_head_pos_list = [str(i) for i in system_mentions if i not in filtered]
+
+    filtered = post_process_by_nam_type(system_mentions)
+    post_process_by_nam_type_list = [str(i) for i in system_mentions if i not in filtered]
+
+    filtered = post_process_weird(system_mentions)
+    post_process_weird_list = [str(i) for i in system_mentions if i not in filtered]
+
+    filtered = post_process_appositions(system_mentions)
+    post_process_appositions_list = [str(i) for i in system_mentions if i not in filtered]
+
+    filtered = post_process_pleonastic_pronoun(system_mentions)
+    post_process_pleonastic_pronoun_list = [str(i) for i in system_mentions if i not in filtered]
+
+    for post_processor in [
+        post_process_same_head_largest_span,
+        post_process_embedded_head_largest_span,
+        post_process_by_head_pos,
+        post_process_by_nam_type,
+        post_process_weird,
+        post_process_appositions,
+        post_process_pleonastic_pronoun
+    ]:
+        system_mentions = post_processor(system_mentions)
+        good_mentions_list = [str(i) for i in system_mentions]
+
+    return [
+        ("good_mentions", good_mentions_list),
+        ("post_process_same_head_largest_span_list", post_process_same_head_largest_span_list),
+        ("post_process_embedded_head_largest_span_list", post_process_embedded_head_largest_span_list),
+        ("post_process_by_head_pos_list", post_process_by_head_pos_list),
+        ("post_process_by_nam_type_list", post_process_by_nam_type_list),
+        ("post_process_weird_list", post_process_weird_list),
+        ("post_process_appositions_list", post_process_appositions_list),
+        ("post_process_pleonastic_pronoun_list", post_process_pleonastic_pronoun_list)
+    ]
+
+
+
 def __extract_system_mention_spans(document):
     mention_spans = []
     for i, sentence_span in enumerate(document.sentence_spans):
@@ -85,11 +158,12 @@ def __extract_system_mention_spans(document):
 
 
 def __extract_mention_spans_for_sentence(sentence_tree, sentence_ner):
+    parented_sentence_tree = nltk.ParentedTree.fromstring(str(sentence_tree))
     return sorted(list(set(
         [__get_in_tree_span(subtree) for subtree
-            in sentence_tree.subtrees(__tree_filter)]
+            in parented_sentence_tree.subtrees(__tree_filter)]
         + __get_span_from_ner(
-            [pos[1] for pos in sentence_tree.pos()], sentence_ner)
+            [pos[1] for pos in parented_sentence_tree.pos()], sentence_ner)
     )))
 
 
